@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>War Room — Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{--bg:#09090B;--s1:#111114;--s2:#1A1A1F;--brd:rgba(255,255,255,.08);--tx:#EEEEF0;--tx2:#A0A0B0;--acc:#E8A023;--red:#EF4444;--grn:#22C55E}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'DM Sans',sans-serif;height:100dvh;overflow:hidden}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#2A2A30;border-radius:2px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+@keyframes rec{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}70%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+
+#app{max-width:1100px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;position:relative}
+
+.hdr{padding:9px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;background:var(--bg);flex-shrink:0;z-index:20}
+.hdr-l{display:flex;align-items:center;gap:9px}
+.logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#E8A023,#EC4899);display:flex;align-items:center;justify-content:center;font-size:14px}
+.hdr-t{font-size:13.5px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.hdr-s{font-size:10px;color:var(--tx2);margin-top:1px}
+.hdr-r{display:flex;align-items:center;gap:5px}
+.run-b{background:var(--s2);border:1px solid var(--brd);border-radius:7px;padding:3px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--acc)}
+.hb{background:var(--s1);border:1px solid var(--brd);border-radius:7px;color:var(--tx2);cursor:pointer;padding:4px 8px;font-size:13px;transition:all .12s}
+.hb:hover{background:var(--s2);color:var(--tx)}
+
+.bod{flex:1;display:flex;overflow:hidden}
+
+/* SIDEBAR */
+.side{width:220px;border-right:1px solid var(--brd);display:flex;flex-direction:column;background:var(--bg);flex-shrink:0;position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .25s ease;box-shadow:4px 0 24px rgba(0,0,0,.6);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.side.open{transform:translateX(0)}
+.side-ov{display:none}
+.side-ov.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:49}
+.side-t{padding:9px 10px 5px;font-size:9px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace}
+.ag-list{overflow-y:visible;padding:2px 4px 4px}
+.ag{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:7px;border:1px solid transparent;margin-bottom:1px;user-select:none;transition:all .1s}
+.ag:hover{background:var(--s1)}
+.ag-av{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.ag-i{flex:1;min-width:0}
+.ag-n{font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-tg{font-size:8.5px;color:var(--tx2)}
+.ag-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ag-mv{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.ag-mv button{width:16px;height:14px;border:none;background:rgba(255,255,255,.06);color:var(--tx2);font-size:8px;cursor:pointer;border-radius:3px;display:flex;align-items:center;justify-content:center;padding:0;line-height:1}
+.ag-mv button:hover{background:rgba(255,255,255,.12);color:var(--tx)}
+.ag-o{font-size:8px;color:var(--tx2);font-family:'JetBrains Mono',monospace;width:12px;text-align:center;flex-shrink:0;opacity:.7}
+.side-h{padding:5px 8px;font-size:8px;color:var(--tx2);border-top:1px solid var(--brd);text-align:center;opacity:.7}
+
+/* Mode toggle */
+.mode-sec{border-top:1px solid var(--brd);padding:8px}
+.mode-row{display:flex;align-items:center;gap:6px;padding:4px 6px}
+.mode-label{font-size:9px;color:var(--tx2);font-family:'JetBrains Mono',monospace;flex:1}
+.toggle{width:32px;height:18px;border-radius:9px;border:none;cursor:pointer;position:relative;transition:background .2s}
+.toggle.off{background:#333}
+.toggle.on{background:var(--acc)}
+.toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:2px;transition:left .2s}
+.toggle.off::after{left:2px}
+.toggle.on::after{left:16px}
+.mode-info{font-size:8px;color:var(--tx2);padding:2px 6px;opacity:.8}
+
+/* Log export */
+.log-sec{border-top:1px solid var(--brd);padding:6px 8px}
+.log-btn{width:100%;padding:5px;border-radius:7px;border:1px solid var(--brd);background:var(--s1);color:var(--tx2);cursor:pointer;font-size:9.5px;font-family:'JetBrains Mono',monospace}
+.log-btn:hover{background:var(--s2);color:var(--tx)}
+
+/* Batch progress */
+.batch-prog{padding:6px 8px;border-top:1px solid var(--brd)}
+.batch-bar{height:4px;border-radius:2px;background:var(--s2);overflow:hidden;margin-top:4px}
+.batch-fill{height:100%;background:var(--acc);transition:width .3s}
+
+/* CHAT */
+.chat-col{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.chat{flex:1;overflow-y:auto;padding:10px 0;display:flex;flex-direction:column;gap:2px}
+.msg-r{display:flex;gap:8px;padding:4px 14px;align-items:flex-start;animation:fadeIn .2s ease}
+.msg-r.usr{flex-direction:row-reverse}
+.av{width:28px;height:28px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-top:2px}
+.msg-c{max-width:75%;min-width:50px}
+.msg-nm{font-size:10px;font-weight:700;margin-bottom:2px;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:5px}
+.msg-tg{font-weight:400;color:var(--tx2);font-size:8.5px}
+.bub{padding:9px 12px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;border-radius:14px}
+.bub.ai{background:var(--s1);color:#E0E0E5;border-top-left-radius:3px}
+.bub.ub{background:linear-gradient(135deg,var(--acc),#B45309);color:#fff;border-top-right-radius:3px}
+.bub.done{opacity:.4;font-style:italic;font-size:11px}
+.msg-tm{font-size:8.5px;color:#888;margin-top:2px;font-family:'JetBrains Mono',monospace}
+.msg-r.usr .msg-tm{text-align:right}
+.sys{text-align:center;padding:4px 14px;font-size:10.5px;color:var(--tx2);animation:fadeIn .15s}
+.mention{font-weight:600;border-radius:3px;padding:0 3px}
+.typing{display:flex;align-items:center;gap:6px;padding:4px 14px;font-size:11px;color:var(--tx2)}
+.t-d span{animation:pulse 1.4s infinite;font-weight:700}.t-d span:nth-child(2){animation-delay:.2s}.t-d span:nth-child(3){animation-delay:.4s}
+
+/* INPUT */
+.inp{border-top:1px solid var(--brd);background:var(--bg);flex-shrink:0;padding:8px 14px 12px}
+.inp-r{display:flex;gap:7px;align-items:flex-end}
+.inp-r textarea{flex:1;padding:12px 14px;border-radius:14px;border:1px solid var(--brd);background:var(--s1);color:var(--tx);font-size:14px;font-family:'DM Sans',sans-serif;resize:none;outline:none;line-height:1.45;min-height:48px;max-height:140px}
+.inp-r textarea:focus{border-color:rgba(232,160,35,.35)}
+.inp-r textarea::placeholder{color:#888}
+.ibtn{width:46px;height:48px;border-radius:12px;border:none;color:#fff;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+
+/* Mention menu */
+.mm{position:absolute;bottom:76px;left:196px;right:14px;background:var(--s1);border:1px solid var(--brd);border-radius:11px;padding:3px;z-index:100;box-shadow:0 6px 24px rgba(0,0,0,.4);animation:fadeIn .1s}
+@media(max-width:700px){.mm{left:14px}}
+.mi{display:flex;align-items:center;gap:8px;width:100%;padding:6px 9px;border:none;background:transparent;color:var(--tx);cursor:pointer;border-radius:7px;font-size:12.5px;text-align:left}
+.mi:hover{background:rgba(255,255,255,.04)}
+
+/* Overlays */
+.ov{position:absolute;bottom:76px;left:50%;transform:translateX(-50%);border-radius:14px;padding:10px 20px;z-index:100;display:flex;align-items:center;gap:10px}
+
+/* Modal */
+.mo-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
+.mo{background:var(--s1);border-radius:16px;padding:22px;width:90%;max-width:400px;max-height:85vh;overflow-y:auto;border:1px solid var(--brd)}
+.mo h2{font-size:15px;font-family:'JetBrains Mono',monospace;font-weight:700;margin-bottom:14px}
+.mo label{color:var(--tx2);font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:5px}
+.mo input[type=password]{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--brd);background:var(--bg);color:var(--tx);font-size:13px;font-family:'JetBrains Mono',monospace;outline:none;margin-bottom:16px;box-sizing:border-box}
+.mo input:focus{border-color:var(--acc)}
+.mo-a{display:flex;gap:8px;margin-top:16px}
+.mo-a button{flex:1;padding:10px;border-radius:9px;cursor:pointer;font-size:13px}
+.bc{border:1px solid var(--brd);background:transparent;color:var(--tx2)}
+.bs{border:none;background:linear-gradient(135deg,var(--acc),#B45309);color:#fff;font-weight:600}
+.empty{margin:auto;text-align:center;padding:30px;max-width:360px;animation:fadeIn .3s}
+
+/* Preset selector */
+.preset-sel{width:100%;padding:5px 4px;font-size:10px;background:var(--s1);color:var(--acc);border:1px solid rgba(232,160,35,.3);border-radius:6px;font-family:'JetBrains Mono',monospace;cursor:pointer;margin-bottom:4px}
+.preset-sel option{background:var(--s1);color:var(--tx)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ═══════════════════════════════════════
+// MODELS
+// ═══════════════════════════════════════
+const ALL_MODELS = {
+  llama:{name:"LLaMA 3.3 70B",avatar:"L",color:"#6366F1",gradient:"linear-gradient(135deg,#6366F1,#8B5CF6)",model:"llama-3.3-70b-versatile",tag:"Meta · 70B",personality:"Balanced all-rounder. Strong reasoning, broad knowledge, reliable."},
+  gptoss:{name:"GPT-OSS 120B",avatar:"⬡",color:"#10B981",gradient:"linear-gradient(135deg,#10B981,#059669)",model:"openai/gpt-oss-120b",tag:"OpenAI · 120B",personality:"OpenAI's flagship open-weight model. Excellent reasoning and analysis."},
+  gptoss20:{name:"GPT-OSS 20B",avatar:"⬢",color:"#34D399",gradient:"linear-gradient(135deg,#34D399,#10B981)",model:"openai/gpt-oss-20b",tag:"OpenAI · 20B",personality:"Fast and efficient. Lightweight reasoning, quick responses, good for rapid tasks."},
+  maverick:{name:"LLaMA 4 Maverick",avatar:"V",color:"#F97316",gradient:"linear-gradient(135deg,#F97316,#EA580C)",model:"meta-llama/llama-4-maverick-17b-128e-instruct",tag:"Meta · 400B MoE",personality:"High-capacity MoE with 128 experts. Creative, multimodal, strong reasoning."},
+  kimi:{name:"Kimi K2",avatar:"K",color:"#EC4899",gradient:"linear-gradient(135deg,#EC4899,#DB2777)",model:"moonshotai/kimi-k2-instruct-0905",tag:"Moonshot · K2",personality:"Strong structured reasoning and creative problem solving."},
+  qwen:{name:"Qwen3 32B",avatar:"Q",color:"#F59E0B",gradient:"linear-gradient(135deg,#F59E0B,#D97706)",model:"qwen/qwen3-32b",tag:"Alibaba · 32B",personality:"Deep analytical thinker. Methodical reasoning, strong at structured problems and logic."},
+  deepseek:{name:"DeepSeek R1",avatar:"D",color:"#8B5CF6",gradient:"linear-gradient(135deg,#8B5CF6,#7C3AED)",model:"deepseek-r1-distill-llama-70b",tag:"DeepSeek · 70B",personality:"Reasoning specialist. Chain-of-thought, analytical, methodical thinker."},
+  scout:{name:"LLaMA 4 Scout",avatar:"S",color:"#06B6D4",gradient:"linear-gradient(135deg,#06B6D4,#0891B2)",model:"meta-llama/llama-4-scout-17b-16e-instruct",tag:"Meta · Scout 17B",personality:"Fast and lightweight. Quick takes, validation, good for rapid iteration."},
+};
+
+const GROQ="https://api.groq.com/openai/v1/chat/completions";
+const WHISPER="https://api.groq.com/openai/v1/audio/transcriptions";
+const STAGGER=1200;
+let MAX_ROUNDS=Math.min(parseInt(localStorage.getItem("wr3_maxrounds")||"10"),50);
+
+const CLONE_NAMES=["Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel"];
+const CLONE_AVATARS=["α","β","γ","δ","ε","ζ","η","θ"];
+const CLONE_COLORS=["#6366F1","#10B981","#F97316","#EC4899","#06B6D4","#F59E0B","#8B5CF6","#34D399"];
+
+// Anonymous nicknames — agents see these instead of real model names
+const NICKNAMES=["Agent-A","Agent-B","Agent-C","Agent-D","Agent-E","Agent-F","Agent-G","Agent-H"];
+
+// ═══════════════════════════════════════
+// SERIES PRESETS (Feature 1)
+// ═══════════════════════════════════════
+const SERIES_PRESETS = {
+  "": {label:"— Custom —",desc:"Manual configuration"},
+  A: {label:"A · Baseline",desc:"8 heterogeneous, Agent-X, blind, free mode",
+    apply:()=>{
+      S.useRealNames=false;S.customTemp=null;
+      S.freeMode=true;S.showStatuses=false;S.showDateTime=false;S.removeErrored=true;
+      MAX_ROUNDS=10;localStorage.setItem("wr3_maxrounds","10");
+      if(S.cloneMode) deactivateCloneMode();
+      Object.keys(ALL_MODELS).forEach(k=>{S.enabled[k]=true});
+    }},
+  B: {label:"B · Homogeneous",desc:"6× same model (clone mode)",
+    apply:()=>{
+      S.useRealNames=false;S.customTemp=null;
+      S.freeMode=true;S.showStatuses=false;S.showDateTime=false;S.removeErrored=true;
+      MAX_ROUNDS=10;localStorage.setItem("wr3_maxrounds","10");
+      activateCloneMode("llama-3.3-70b-versatile",8);
+    }},
+  C: {label:"C · Real Names",desc:"Agents see real model names, not Agent-X",
+    apply:()=>{
+      S.useRealNames=true;S.customTemp=null;
+      S.freeMode=true;S.showStatuses=false;S.showDateTime=false;S.removeErrored=true;
+      MAX_ROUNDS=10;localStorage.setItem("wr3_maxrounds","10");
+      if(S.cloneMode) deactivateCloneMode();
+      Object.keys(ALL_MODELS).forEach(k=>{S.enabled[k]=true});
+    }},
+  E: {label:"E · Shuffle",desc:"Baseline + randomized order each run",
+    apply:()=>{
+      S.useRealNames=false;S.customTemp=null;
+      S.freeMode=true;S.showStatuses=false;S.showDateTime=false;S.removeErrored=true;
+      MAX_ROUNDS=10;localStorage.setItem("wr3_maxrounds","10");
+      if(S.cloneMode) deactivateCloneMode();
+      Object.keys(ALL_MODELS).forEach(k=>{S.enabled[k]=true});
+      shuffleOrder();
+    }},
+  F: {label:"F · Isolated",desc:"Each agent answers alone (no group)",
+    apply:()=>{
+      S.useRealNames=false;S.customTemp=null;S.isolatedMode=true;
+      S.freeMode=false;S.showStatuses=false;S.showDateTime=false;S.removeErrored=true;
+      MAX_ROUNDS=1;localStorage.setItem("wr3_maxrounds","1");
+      if(S.cloneMode) deactivateCloneMode();
+      Object.keys(ALL_MODELS).forEach(k=>{S.enabled[k]=true});
+    }},
+  G: {label:"G · Minimal EN",desc:"English prompt, pure emergence test",
+    apply:()=>{
+      S.useRealNames=false;S.customTemp=null;
+      S.freeMode=true;S.showStatuses=false;S.showDateTime=false;S.removeErrored=true;
+      MAX_ROUNDS=10;localStorage.setItem("wr3_maxrounds","10");
+      if(S.cloneMode) deactivateCloneMode();
+      Object.keys(ALL_MODELS).forEach(k=>{S.enabled[k]=true});
+    }},
+  H: {label:"H · Alt Task",desc:"Alternative task / different prompt topic",
+    apply:()=>{
+      S.useRealNames=false;S.customTemp=null;
+      S.freeMode=true;S.showStatuses=false;S.showDateTime=false;S.removeErrored=true;
+      MAX_ROUNDS=10;localStorage.setItem("wr3_maxrounds","10");
+      if(S.cloneMode) deactivateCloneMode();
+      Object.keys(ALL_MODELS).forEach(k=>{S.enabled[k]=true});
+    }},
+  I: {label:"I · High Temp",desc:"Temperature 0.95 (vs 0.8 baseline)",
+    apply:()=>{
+      S.useRealNames=false;S.customTemp=0.95;
+      S.freeMode=true;S.showStatuses=false;S.showDateTime=false;S.removeErrored=true;
+      MAX_ROUNDS=10;localStorage.setItem("wr3_maxrounds","10");
+      if(S.cloneMode) deactivateCloneMode();
+      Object.keys(ALL_MODELS).forEach(k=>{S.enabled[k]=true});
+    }},
+  J: {label:"J · Extended",desc:"20 rounds (vs 10 baseline)",
+    apply:()=>{
+      S.useRealNames=false;S.customTemp=null;
+      S.freeMode=true;S.showStatuses=false;S.showDateTime=false;S.removeErrored=true;
+      MAX_ROUNDS=20;localStorage.setItem("wr3_maxrounds","20");
+      if(S.cloneMode) deactivateCloneMode();
+      Object.keys(ALL_MODELS).forEach(k=>{S.enabled[k]=true});
+    }},
+  K1:{label:"K1 · No Others",desc:"Prompt without 'Other agents:' line",
+    apply:()=>{
+      S.useRealNames=false;S.customTemp=null;S.promptAblation="K1";
+      S.freeMode=true;S.showStatuses=false;S.showDateTime=false;S.removeErrored=true;
+      MAX_ROUNDS=10;localStorage.setItem("wr3_maxrounds","10");
+      if(S.cloneMode) deactivateCloneMode();
+      Object.keys(ALL_MODELS).forEach(k=>{S.enabled[k]=true});
+    }},
+  K2:{label:"K2 · No Name",desc:"Prompt without 'You are {name}' line",
+    apply:()=>{
+      S.useRealNames=false;S.customTemp=null;S.promptAblation="K2";
+      S.freeMode=true;S.showStatuses=false;S.showDateTime=false;S.removeErrored=true;
+      MAX_ROUNDS=10;localStorage.setItem("wr3_maxrounds","10");
+      if(S.cloneMode) deactivateCloneMode();
+      Object.keys(ALL_MODELS).forEach(k=>{S.enabled[k]=true});
+    }},
+  K3:{label:"K3 · Empty",desc:"Empty system prompt (no identity, no others)",
+    apply:()=>{
+      S.useRealNames=false;S.customTemp=null;S.promptAblation="K3";
+      S.freeMode=true;S.showStatuses=false;S.showDateTime=false;S.removeErrored=true;
+      MAX_ROUNDS=10;localStorage.setItem("wr3_maxrounds","10");
+      if(S.cloneMode) deactivateCloneMode();
+      Object.keys(ALL_MODELS).forEach(k=>{S.enabled[k]=true});
+    }},
+};
+
+function applyPreset(key){
+  S.seriesPreset=key;
+  if(key && SERIES_PRESETS[key]?.apply){
+    S.promptAblation=null; // reset ablation before apply
+    S.isolatedMode=false; // reset isolated mode before apply
+    SERIES_PRESETS[key].apply();
+  }
+  save();render();
+}
+
+function getNickname(k){
+  // Feature 1: Real names mode (Série C)
+  if(S.useRealNames && getModels()[k]) return getModels()[k].name;
+  const idx=activeKeys().indexOf(k);
+  return idx>=0?NICKNAMES[idx]:(NICKNAMES[Object.keys(getModels()).indexOf(k)]||k);
+}
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let S={
+  msgs:[],
+  key:(localStorage.getItem("wr3_key")||"").replace(/[^\x20-\x7E]/g,"").trim(),
+  order:JSON.parse(localStorage.getItem("wr3_order")||'["llama","gptoss","gptoss20","maverick","kimi","qwen","deepseek","scout"]'),
+  enabled:JSON.parse(localStorage.getItem("wr3_on")||'{"llama":true,"gptoss":true,"gptoss20":true,"maverick":true,"kimi":true,"qwen":true,"deepseek":true,"scout":true}'),
+  whisper:localStorage.getItem("wr3_w")||"whisper-large-v3-turbo",
+  freeMode:localStorage.getItem("wr3_free")==="true",
+  showStatuses:localStorage.getItem("wr3_statuses")==="true",
+  showDateTime:localStorage.getItem("wr3_datetime")==="true",
+  removeErrored:localStorage.getItem("wr3_removeErrored")!=="false", // default ON
+  typing:[],
+  statuses:{}, // key -> 'idle'|'typing'|'done'|'error'
+  showSettings:false,
+  showMention:false,
+  sideOpen:false,
+  recording:false,recDur:0,transcribing:false,
+  runCount:parseInt(localStorage.getItem("wr3_runs")||"0"),
+  logs:JSON.parse(localStorage.getItem("wr3_logs")||"[]"),
+  // Clone mode
+  cloneMode:false,
+  cloneModel:"",
+  cloneCount:6,
+  _cloneModels:null, // generated clone models
+  // Feature 1: Presets
+  seriesPreset:"",
+  useRealNames:false,
+  customTemp:null,
+  promptAblation:null, // null, "K1", "K2", "K3"
+  isolatedMode:false,
+  // Feature 2: Batch runner
+  batchRunning:false,
+  batchProgress:{current:0,total:0},
+  batchResults:[], // collected experiment JSONs
+};
+let mediaRec=null,chunks=[],recTimer=null;
+
+// Migrate: add new models to order/enabled if not present
+Object.keys(ALL_MODELS).forEach(k=>{
+  if(!S.order.includes(k)) S.order.push(k);
+  if(S.enabled[k]===undefined) S.enabled[k]=false;
+});
+
+// ═══════════════════════════════════════
+// CLONE MODE
+// ═══════════════════════════════════════
+function buildCloneModels(){
+  if(!S.cloneModel) return null;
+  const src=Object.values(ALL_MODELS).find(m=>m.model===S.cloneModel)||Object.values(ALL_MODELS)[0];
+  const clones={};
+  for(let i=0;i<S.cloneCount;i++){
+    const key="clone_"+i;
+    clones[key]={
+      name:CLONE_NAMES[i]||("Clone_"+i),
+      avatar:CLONE_AVATARS[i]||""+i,
+      color:CLONE_COLORS[i%CLONE_COLORS.length],
+      gradient:`linear-gradient(135deg,${CLONE_COLORS[i%CLONE_COLORS.length]},${CLONE_COLORS[(i+1)%CLONE_COLORS.length]})`,
+      model:S.cloneModel,
+      tag:src.tag+" · Clone",
+      personality:src.personality,
+    };
+  }
+  return clones;
+}
+
+function activateCloneMode(modelId,count){
+  S.cloneMode=true;
+  S.cloneModel=modelId;
+  S.cloneCount=count;
+  S._cloneModels=buildCloneModels();
+  S.order=Object.keys(S._cloneModels);
+  S.enabled={};
+  S.order.forEach(k=>S.enabled[k]=true);
+  S.msgs=[];S.statuses={};
+  render();
+}
+
+function deactivateCloneMode(){
+  S.cloneMode=false;
+  S.cloneModel="";
+  S._cloneModels=null;
+  S.order=JSON.parse(localStorage.getItem("wr3_order")||'["llama","gptoss","gptoss20","maverick","kimi","qwen","deepseek","scout"]');
+  S.enabled=JSON.parse(localStorage.getItem("wr3_on")||'{"llama":true,"gptoss":true,"gptoss20":true,"maverick":true,"kimi":true,"qwen":true,"deepseek":true,"scout":true}');
+  Object.keys(ALL_MODELS).forEach(k=>{
+    if(!S.order.includes(k)) S.order.push(k);
+    if(S.enabled[k]===undefined) S.enabled[k]=false;
+  });
+  S.msgs=[];S.statuses={};
+  render();
+}
+
+// Universal accessor — returns clone models or normal models
+function getModels(){ return S.cloneMode&&S._cloneModels?S._cloneModels:ALL_MODELS; }
+
+function save(){
+  localStorage.setItem("wr3_order",JSON.stringify(S.order));
+  localStorage.setItem("wr3_on",JSON.stringify(S.enabled));
+  localStorage.setItem("wr3_free",S.freeMode);
+  localStorage.setItem("wr3_statuses",S.showStatuses);
+  localStorage.setItem("wr3_datetime",S.showDateTime);
+  localStorage.setItem("wr3_removeErrored",S.removeErrored);
+  localStorage.setItem("wr3_runs",S.runCount);
+  localStorage.setItem("wr3_logs",JSON.stringify(S.logs.slice(-50)));
+}
+
+function activeKeys(){return S.order.filter(k=>S.enabled[k])}
+function timeNow(){return new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}
+
+// ═══════════════════════════════════════
+// SYSTEM PROMPT — agents see who's connected
+// ═══════════════════════════════════════
+function sysPrompt(k){
+  const m=getModels()[k];
+  const myNick=getNickname(k);
+  const others=activeKeys().filter(x=>x!==k).map(x=>getNickname(x));
+
+  // Série F: isolated mode — no group context
+  if(S.isolatedMode) return "You are an AI assistant.";
+
+  // Feature 1: Prompt ablation (K1/K2/K3)
+  if(S.promptAblation==="K3") return ""; // empty prompt
+  if(S.promptAblation==="K2") return `Other agents: ${others.join(", ")}`; // no identity
+  if(S.promptAblation==="K1") return `You are ${myNick} in a group chat.`; // no others
+
+  let prompt=`You are ${myNick} in a group chat.
+Other agents: ${others.join(", ")}`;
+
+  if(S.showStatuses){
+    const statusLines=activeKeys().filter(x=>x!==k).map(x=>{
+      const st=S.statuses[x]||"idle";
+      return `- ${getNickname(x)}: ${st}`;
+    });
+    prompt+=`\n\nAgent statuses:\n${statusLines.join("\n")}`;
+  }
+
+  // Inject current datetime if enabled
+  if(S.showDateTime){
+    prompt+=`\n\nCurrent time: ${new Date().toUTCString()}`;
+  }
+
+  return prompt;
+}
+
+// ═══════════════════════════════════════
+// API
+// ═══════════════════════════════════════
+function buildMsgs(msgs,target){
+  const o=[];
+  for(const m of msgs){
+    if(!m.text?.trim()) continue;
+    const cleanText=m.text.trim();
+    if(!cleanText) continue;
+    if(m.sender==="user") o.push({role:"user",content:cleanText});
+    else if(m.sender===target) o.push({role:"assistant",content:cleanText});
+    else if(!S.isolatedMode && getModels()[m.sender]) o.push({role:"user",content:`[${getNickname(m.sender)}]: ${cleanText}`});
+  }
+  return o;
+}
+
+async function callGroq(key,msgs){
+  const temp=S.customTemp||0.8; // Feature 1: custom temperature
+  const r=await fetch(GROQ,{method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+S.key.trim()},
+    body:JSON.stringify({model:getModels()[key].model,max_tokens:1024,temperature:temp,
+      messages:[{role:"system",content:sysPrompt(key)},...msgs]})});
+  const d=await r.json();
+  if(d.error) throw new Error(d.error.message||JSON.stringify(d.error));
+  // Strip <think>...</think> blocks (Qwen3, DeepSeek reasoning)
+  const text=d.choices[0].message.content.replace(/<think>[\s\S]*?<\/think>\s*/g,"").trim();
+  return {text, model_id:d.model||getModels()[key].model};
+}
+
+async function transcribe(blob){
+  const fd=new FormData();fd.append("file",blob,"rec.webm");fd.append("model",S.whisper);fd.append("response_format","json");
+  const r=await fetch(WHISPER,{method:"POST",headers:{"Authorization":"Bearer "+S.key.trim()},body:fd});
+  const d=await r.json();if(d.error) throw new Error(d.error.message);return d.text;
+}
+
+// ═══════════════════════════════════════
+// MENTIONS DETECTION
+// ═══════════════════════════════════════
+function parseMentions(t){
+  const re=new RegExp(`@(${Object.keys(getModels()).join("|")}|all)\\b`,"gi"),m=[];let x;
+  while((x=re.exec(t))!==null) m.push(x[1].toLowerCase());
+  return m.length?m:["all"];
+}
+
+function detectAIMentions(text,senderKey){
+  const keys=activeKeys().filter(k=>k!==senderKey);
+  const found=[];
+  for(const k of keys){
+    const re=new RegExp(`(@${k}\\b|\\b${getModels()[k].name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b)`,"gi");
+    if(re.test(text)) found.push(k);
+  }
+  return found;
+}
+
+// ═══════════════════════════════════════
+// FEATURE 3: Language detection heuristic
+// ═══════════════════════════════════════
+function detectLanguage(text){
+  if(!text) return "unknown";
+  // Arabic: check for Arabic unicode characters
+  if(/[\u0600-\u06FF]/.test(text)) return "ar";
+  // French indicators
+  const frWords=/\b(les|des|une|est|pour|dans|avec|nous|vous|cette|notre|votre|sont|mais|aussi|peut|comme|qui|que|par|sur|pas|tout|bien|faire|avoir|être|donc|alors|très|plus|quel|sans|après|autre|entre|sous|encore|même|peu|trop|rien|chaque|selon|vers|chez|lors|depuis|pendant)\b/gi;
+  const frCount=(text.match(frWords)||[]).length;
+  // English indicators
+  const enWords=/\b(the|and|is|are|was|were|have|has|been|will|would|could|should|with|from|this|that|they|their|what|which|there|about|into|more|some|than|them|then|these|when|your|each|make|like|just|over|such|take|also|most|only|very|after|before|being|between|does|during|every|first|through|under|while)\b/gi;
+  const enCount=(text.match(enWords)||[]).length;
+  const wordCount=text.split(/\s+/).length;
+  if(wordCount<3) return "unknown";
+  const frRatio=frCount/wordCount;
+  const enRatio=enCount/wordCount;
+  if(frRatio>0.08 && frRatio>enRatio) return "fr";
+  if(enRatio>0.05) return "en";
+  return "unknown";
+}
+
+// ═══════════════════════════════════════
+// FEATURE 3: Enriched mentions extraction
+// ═══════════════════════════════════════
+function extractMentions(text,senderKey){
+  if(!text) return [];
+  const mentions=[];
+  const keys=activeKeys();
+  for(const k of keys){
+    if(k===senderKey) continue;
+    const nick=getNickname(k);
+    const modelName=getModels()[k]?.name||"";
+    const patterns=[
+      new RegExp(`\\b${nick.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,"gi"),
+      new RegExp(`\\b${modelName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,"gi"),
+      new RegExp(`@${k}\\b`,"gi"),
+    ];
+    for(const p of patterns){
+      if(p.source && p.test(text)){
+        mentions.push({key:k,nickname:nick,model:modelName});
+        break;
+      }
+    }
+  }
+  return mentions;
+}
+
+// ═══════════════════════════════════════
+// SEND + MULTI-ROUND
+// ═══════════════════════════════════════
+let busy=false;
+let stopRequested=false;
+async function send(text,isVoice=false){
+  if(!text.trim()||!S.key||busy) return;
+  busy=true;
+  stopRequested=false;
+  permanentlyErrored=new Set();
+  const mentions=parseMentions(text);
+  S.msgs.push({id:Date.now(),sender:"user",text:text.trim(),time:timeNow(),isVoice});
+
+  // Increment run
+  S.runCount++;save();
+
+  const targets=mentions.includes("all")?activeKeys():mentions.filter(m=>getModels()[m]&&S.enabled[m]);
+  if(!targets.length){S.msgs.push({id:Date.now()+"s",sender:"system",text:"No agents targeted.",time:timeNow()});render();busy=false;return;}
+
+  // Run log entry
+  const logEntry={run:S.runCount,time:new Date().toISOString(),prompt:text.trim(),order:[...S.order],enabled:{...S.enabled},mode:S.freeMode?"free":"single",showStatuses:S.showStatuses,responses:[],compensations:[]};
+
+  try{
+    await runRound(targets,logEntry,0);
+  }catch(e){
+    console.error("Run error:",e);
+  }finally{
+    // Always save log
+    S.logs.push(logEntry);save();
+    // Auto-save experiment file (skip during batch — zip handles it)
+    if(!S.batchRunning) autoSaveExperiment();
+    busy=false;
+  }
+}
+
+// Track permanently errored agents across rounds (reset per run in send())
+let permanentlyErrored=new Set();
+const PERM_KEYWORDS=["decommissioned","not found","not supported","does not exist","no longer available"];
+
+async function runRound(targets,logEntry,round){
+  const delay=ms=>new Promise(r=>setTimeout(r,ms));
+
+  // Filter out permanently errored agents
+  targets=targets.filter(k=>!permanentlyErrored.has(k));
+  if(!targets.length) return;
+
+  // Set statuses
+  targets.forEach(k=>{S.statuses[k]="typing"});
+  S.typing=[...new Set([...S.typing,...targets])];render();
+
+  const roundResponses=[];
+
+  for(let i=0;i<targets.length;i++){
+    const key=targets[i];
+    if(i>0) await delay(STAGGER);
+    (async()=>{
+      try{
+        const res=await Promise.race([
+          callGroq(key,buildMsgs(S.msgs.filter(m=>m.sender!=="system"),key)),
+          new Promise((_,rej)=>setTimeout(()=>rej(new Error("Timeout 30s")),30000))
+        ]);
+        const msg={id:Date.now()+"_"+key+"_r"+round,sender:key,text:res.text,time:timeNow(),round,model_id:res.model_id};
+        S.msgs.push(msg);
+        S.statuses[key]="done";
+        roundResponses.push({agent:key,text:res.text,error:false});
+        logEntry.responses.push({agent:key,round,text:res.text.substring(0,300)});
+      }catch(e){
+        S.msgs.push({id:Date.now()+"_e_"+key,sender:key,text:`⚠ ${e.message}`,time:timeNow(),round});
+        S.statuses[key]="error";
+        roundResponses.push({agent:key,text:e.message,error:true});
+        logEntry.responses.push({agent:key,round,error:e.message});
+        if(PERM_KEYWORDS.some(kw=>e.message.toLowerCase().includes(kw))) permanentlyErrored.add(key);
+      }
+      S.typing=S.typing.filter(t=>t!==key);render();
+    })();
+  }
+
+  // Wait for round to finish
+  await new Promise(res=>{
+    const chk=()=>targets.every(t=>!S.typing.includes(t))?res():setTimeout(chk,200);chk();
+  });
+
+  // Log compensations
+  const errored=roundResponses.filter(r=>r.error).map(r=>r.agent);
+  const compensated=roundResponses.filter(r=>!r.error&&errored.some(e=>r.text.includes(getModels()[e]?.name)||r.text.includes(getNickname(e))));
+  compensated.forEach(c=>{
+    logEntry.compensations.push({compensator:c.agent,forAgent:errored.find(e=>c.text.includes(getModels()[e]?.name)||c.text.includes(getNickname(e))),round});
+  });
+
+  // FREE MODE: give every active agent a chance to continue
+  if(S.freeMode && round < MAX_ROUNDS && !stopRequested){
+    await delay(1000);
+
+    // Filter agents for next round
+    const eligible=activeKeys().filter(k=>{
+      if(permanentlyErrored.has(k)) return false;
+      if(!S.removeErrored) return true;
+      const lastResp=roundResponses.find(r=>r.agent===k);
+      return !lastResp || !lastResp.error;
+    });
+
+    if(eligible.length===0) return;
+
+    S.msgs.push({id:Date.now()+"_r",sender:"system",
+      text:`— Round ${round+2} —`,time:timeNow()});
+    render();
+
+    const nextResponses=[];
+    S.typing=[...eligible];render();
+
+    for(let i=0;i<eligible.length;i++){
+      const key=eligible[i];
+      if(i>0) await delay(STAGGER);
+      (async()=>{
+        try{
+          const res=await Promise.race([
+            callGroq(key,buildMsgs(S.msgs.filter(m=>m.sender!=="system"),key)),
+            new Promise((_,rej)=>setTimeout(()=>rej(new Error("Timeout 30s")),30000))
+          ]);
+          const msg={id:Date.now()+"_"+key+"_r"+(round+1),sender:key,text:res.text,time:timeNow(),round:round+1,model_id:res.model_id};
+          S.msgs.push(msg);
+          S.statuses[key]="done";
+          nextResponses.push({agent:key,text:res.text,error:false});
+          logEntry.responses.push({agent:key,round:round+1,text:res.text.substring(0,300)});
+        }catch(e){
+          S.msgs.push({id:Date.now()+"_e2_"+key,sender:key,text:`⚠ ${e.message}`,time:timeNow(),round:round+1});
+          S.statuses[key]="error";
+          nextResponses.push({agent:key,text:e.message,error:true});
+          logEntry.responses.push({agent:key,round:round+1,error:e.message});
+          if(PERM_KEYWORDS.some(kw=>e.message.toLowerCase().includes(kw))) permanentlyErrored.add(key);
+        }
+        S.typing=S.typing.filter(t=>t!==key);render();
+      })();
+    }
+
+    // Wait for all
+    await new Promise(res=>{
+      const chk=()=>eligible.every(t=>!S.typing.includes(t))?res():setTimeout(chk,200);chk();
+    });
+
+    // Check if conversation should continue
+    const errorCount=nextResponses.filter(r=>r.error).length;
+    const allErrored=nextResponses.every(r=>r.error);
+    const majorityErrored=errorCount > nextResponses.length * 0.6;
+    if(allErrored || majorityErrored){
+      S.msgs.push({id:Date.now()+"_stop",sender:"system",
+        text:allErrored?"⏹ All agents hit errors — stopping.":"⏹ Most agents hit rate limits — stopping.",time:timeNow()});
+      render();return;
+    }
+
+    // Continue with all non-errored agents until max rounds
+    const stillActive=activeKeys().filter(k=>{
+      if(permanentlyErrored.has(k)) return false;
+      const r=nextResponses.find(x=>x.agent===k);
+      if(S.removeErrored) return !r || !r.error;
+      return true;
+    });
+
+    if(stillActive.length>0 && round+1 < MAX_ROUNDS && !stopRequested){
+      await delay(1000);
+      S.msgs.push({id:Date.now()+"_r2",sender:"system",
+        text:"\u2014 Round "+(round+3)+" \u2014",time:timeNow()});
+      render();
+      await runRound(stillActive,logEntry,round+2);
+    } else if(!stopRequested){
+      S.msgs.push({id:Date.now()+"_done",sender:"system",
+        text:"\u2705 Max rounds ("+MAX_ROUNDS+") reached.",time:timeNow()});
+      render();
+    }
+  }
+}
+
+// ═══════════════════════════════════════
+// VOICE
+// ═══════════════════════════════════════
+async function startRec(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRec=new MediaRecorder(stream,{mimeType:"audio/webm;codecs=opus"});chunks=[];
+    mediaRec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)};
+    mediaRec.start();S.recording=true;S.recDur=0;
+    recTimer=setInterval(()=>{S.recDur++;render()},1000);render();
+  }catch(e){console.error(e)}
+}
+async function stopRec(){
+  if(!mediaRec||mediaRec.state==="inactive")return;
+  return new Promise(res=>{
+    mediaRec.onstop=async()=>{
+      const blob=new Blob(chunks,{type:"audio/webm"});
+      mediaRec.stream.getTracks().forEach(t=>t.stop());
+      clearInterval(recTimer);S.recording=false;S.recDur=0;S.transcribing=true;render();
+      try{
+        const t=await transcribe(blob);S.transcribing=false;render();
+        if(t&&t.trim()) await send(t.trim().match(/@\w+/)?t.trim():`@all ${t.trim()}`,true);
+      }catch(e){S.msgs.push({id:Date.now()+"_te",sender:"system",text:`🎤 ${e.message}`,time:timeNow()});S.transcribing=false;render();}
+      res();
+    };mediaRec.stop();
+  });
+}
+function cancelRec(){
+  if(mediaRec&&mediaRec.state!=="inactive"){mediaRec.stream.getTracks().forEach(t=>t.stop());mediaRec.stop();}
+  clearInterval(recTimer);S.recording=false;S.recDur=0;chunks=[];render();
+}
+
+// ═══════════════════════════════════════
+// REORDER
+// ═══════════════════════════════════════
+function moveUp(k){
+  const i=S.order.indexOf(k);
+  if(i<=0)return;
+  [S.order[i-1],S.order[i]]=[S.order[i],S.order[i-1]];
+  save();render();
+}
+function moveDown(k){
+  const i=S.order.indexOf(k);
+  if(i>=S.order.length-1)return;
+  [S.order[i],S.order[i+1]]=[S.order[i+1],S.order[i]];
+  save();render();
+}
+
+// ═══════════════════════════════════════
+// LOG / SAVE EXPERIMENT (Feature 3: Enriched)
+// ═══════════════════════════════════════
+function buildExperiment(){
+  const now=new Date();
+  const ts=now.toISOString().replace(/[:.]/g,"-").slice(0,19);
+  
+  // Build ordered ranking
+  const ranking=S.order.map((k,i)=>({
+    position:i+1,
+    key:k,
+    name:getModels()[k].name,
+    nickname:getNickname(k),
+    model:getModels()[k].model,
+    personality:getModels()[k].personality,
+    enabled:!!S.enabled[k],
+  }));
+
+  // Split errors: permanent (decommissioned/not found) vs transient (rate limit/timeout)
+  const permanentKeywords=["decommissioned","not found","not supported","does not exist","no longer available"];
+  const allErrors=S.msgs.filter(m=>getModels()[m.sender]&&m.text?.startsWith("⚠"));
+  
+  const permanentErrors=new Set();
+  const transientErrors=new Set();
+  allErrors.forEach(m=>{
+    const name=getModels()[m.sender].name;
+    const isPermanent=permanentKeywords.some(kw=>m.text.toLowerCase().includes(kw));
+    if(isPermanent) permanentErrors.add(name);
+    else transientErrors.add(name);
+  });
+  // If an agent has both permanent and transient, permanent wins
+  transientErrors.forEach(n=>{if(permanentErrors.has(n)) transientErrors.delete(n)});
+
+  return {
+    // ── CONDITION (for filtering across runs) ──
+    condition:{
+      label:S.seriesPreset||( S.cloneMode?"homogeneous":((S.showStatuses?"aware":"blind")+(S.showDateTime?"-timed":""))),
+      series:S.seriesPreset||"custom",
+      statusesVisible:S.showStatuses,
+      dateTimeVisible:S.showDateTime,
+      removeErrored:S.removeErrored,
+      mode:S.freeMode?"free":"single",
+      temperature:S.customTemp||0.8,
+      promptAblation:S.promptAblation||null,
+      useRealNames:S.useRealNames,
+      isolatedMode:S.isolatedMode,
+      cloneMode:S.cloneMode,
+      ...(S.cloneMode?{cloneModel:S.cloneModel,cloneCount:S.cloneCount,cloneModelName:Object.values(ALL_MODELS).find(m=>m.model===S.cloneModel)?.name||S.cloneModel}:{}),
+    },
+    // ── HEADER: Environment ──
+    environment:{
+      id:`run-${S.runCount}-${ts}`,
+      date:now.toLocaleDateString("fr-FR"),
+      time:now.toLocaleTimeString("fr-FR"),
+      timestamp:now.toISOString(),
+      runNumber:S.runCount,
+      mode:S.freeMode?"free":"single",
+      statusesVisible:S.showStatuses,
+      dateTimeVisible:S.showDateTime,
+      staggerMs:STAGGER,
+      maxRounds:MAX_ROUNDS,
+      removeErrored:S.removeErrored,
+      agentRanking:ranking,
+      activeAgents:ranking.filter(r=>r.enabled).map(r=>`#${r.position} ${r.name}`),
+      disabledAgents:ranking.filter(r=>!r.enabled).map(r=>r.name),
+      systemPromptTemplate:S.isolatedMode?"You are an AI assistant."
+        :S.promptAblation==="K3"?"(empty)"
+        :S.promptAblation==="K2"?"Other agents: {others}"
+        :S.promptAblation==="K1"?"You are {name} in a group chat."
+        :`You are {name} in a group chat.\nOther agents: {others}${S.showStatuses?"\n+ Agent statuses injected":""}${S.showDateTime?"\n+ Current time injected":""}`,
+    },
+    // ── BODY: Conversation log (Feature 3: enriched) ──
+    conversation:{
+      userPrompt:S.msgs.find(m=>m.sender==="user")?.text||"",
+      messages:S.msgs.map(m=>{
+        const out={sender:m.sender,time:m.time};
+        if(m.sender==="user"){
+          out.text=m.text;
+          out.wordCount=m.text.split(/\s+/).length;
+        } else if(m.sender==="system"){
+          out.system=m.text;
+        } else {
+          out.agent=getModels()[m.sender]?.name||m.sender;
+          out.agent_nickname=getNickname(m.sender); // Feature 3
+          out.model_id=m.model_id||getModels()[m.sender]?.model||"unknown";
+          out.position=S.order.indexOf(m.sender)+1;
+          out.round=m.round;
+          out.text=m.text;
+          out.wordCount=m.text?m.text.split(/\s+/).length:0;
+          out.isError=m.text?.startsWith("⚠")||false;
+          out.language_detected=detectLanguage(m.text); // Feature 3
+          out.mentions=extractMentions(m.text,m.sender); // Feature 3
+          if(!out.isError&&permanentErrors.size>0){
+            const agentName=getModels()[m.sender]?.name;
+            const mentionsDead=[...permanentErrors].filter(n=>n!==agentName&&m.text?.includes(n));
+            if(mentionsDead.length>0){
+              out.mentionsDeadAgent=true;
+              out.deadAgentsMentioned=mentionsDead;
+            }
+          }
+        }
+        if(m.isVoice) out.isVoice=true;
+        return out;
+      }),
+    },
+    // ── FOOTER: Stats ──
+    stats:{
+      totalMessages:S.msgs.filter(m=>m.sender!=="system").length,
+      userMessages:S.msgs.filter(m=>m.sender==="user").length,
+      aiMessages:S.msgs.filter(m=>m.sender!=="user"&&m.sender!=="system").length,
+      errors:S.msgs.filter(m=>m.text?.startsWith("⚠")).length,
+      rounds:Math.max(0,...S.msgs.filter(m=>m.round!==undefined).map(m=>m.round))+1,
+      agentsWhoResponded:[...new Set(S.msgs.filter(m=>getModels()[m.sender]&&!m.text?.startsWith("⚠")).map(m=>getModels()[m.sender].name))],
+      agentsWhoErrored:{
+        permanent:[...permanentErrors],
+        transient:[...transientErrors],
+      },
+      compensationEvents:S.msgs.filter(m=>{
+        if(!getModels()[m.sender]||m.text?.startsWith("⚠")) return false;
+        const agentName=getModels()[m.sender].name;
+        return [...permanentErrors].some(n=>n!==agentName&&(m.text?.includes(n)||m.text?.includes(getNickname(S.order.find(k=>getModels()[k]?.name===n)||''))));
+      }).map(m=>({
+        agent:getModels()[m.sender].name,
+        round:m.round,
+        mentionedDead:[...permanentErrors].filter(n=>n!==getModels()[m.sender].name&&(m.text?.includes(n)||m.text?.includes(getNickname(S.order.find(k=>getModels()[k]?.name===n)||''))))
+      })),
+    }
+  };
+}
+
+function saveExperiment(){
+  const exp=buildExperiment();
+  const now=new Date();
+  const d=now.toISOString().slice(0,10);
+  const t=now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}).replace(/:/g,"h");
+  const series=S.seriesPreset?`-S${S.seriesPreset}`:"";
+  const fname=`warroom-${d}-${t}${series}-run${S.runCount}.json`;
+  const blob=new Blob([JSON.stringify(exp,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=fname;a.click();
+  return exp; // return for batch runner
+}
+
+function autoSaveExperiment(){
+  try{
+    saveExperiment();
+  }catch(e){
+    console.warn("Auto-save blocked by browser:",e);
+  }
+  // Also store in localStorage as backup
+  try{
+    const exp=buildExperiment();
+    localStorage.setItem("wr3_last_exp",JSON.stringify(exp));
+  }catch(e){}
+}
+
+// ═══════════════════════════════════════
+// SHUFFLE ORDER
+// ═══════════════════════════════════════
+function shuffleOrder(){
+  for(let i=S.order.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [S.order[i],S.order[j]]=[S.order[j],S.order[i]];
+  }
+  save();render();
+}
+
+function exportLogs(){
+  const blob=new Blob([JSON.stringify(S.logs,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`warroom-all-logs-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+// ═══════════════════════════════════════
+// FEATURE 2: BATCH RUNNER
+// ═══════════════════════════════════════
+async function runBatch(prompt,count){
+  if(!prompt.trim()||!S.key||S.batchRunning) return;
+  S.batchRunning=true;
+  S.batchProgress={current:0,total:count};
+  S.batchResults=[];
+  render();
+
+  for(let i=0;i<count;i++){
+    if(!S.batchRunning) break; // allow cancel
+    S.batchProgress.current=i+1;
+    render();
+
+    // Reset chat for new run
+    S.msgs=[];S.statuses={};
+
+    // If Série E, shuffle before each run
+    if(S.seriesPreset==="E") shuffleOrder();
+
+    // Send the prompt (this handles the full run including multi-round)
+    await send(prompt);
+
+    // Wait for run to complete
+    await new Promise(res=>{
+      const chk=()=>!busy?res():setTimeout(chk,500);chk();
+    });
+
+    // Collect result (buildExperiment returns current state)
+    const exp=buildExperiment();
+    exp.batch={index:i+1,total:count,series:S.seriesPreset||"custom"};
+    S.batchResults.push(exp);
+
+    // Auto-save individual JSON after each run
+    try{
+      const series=S.seriesPreset||"custom";
+      const d=new Date().toISOString().slice(0,10);
+      const t=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}).replace(/:/g,"h");
+      const blob=new Blob([JSON.stringify(exp,null,2)],{type:"application/json"});
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);
+      a.download=`warroom-${d}-${t}-S${series}-run${String(i+1).padStart(2,"0")}.json`;
+      a.click();
+    }catch(e){console.error("Auto-save error:",e);}
+
+    // Brief pause between runs to avoid rate limits
+    if(i<count-1) await new Promise(r=>setTimeout(r,3000));
+  }
+
+  // Zip all results
+  try{
+    if(typeof JSZip!=="undefined"){
+      const zip=new JSZip();
+      const series=S.seriesPreset||"custom";
+      const d=new Date().toISOString().slice(0,10);
+      S.batchResults.forEach((exp,i)=>{
+        zip.file(`warroom-${series}-run${String(i+1).padStart(2,"0")}.json`,JSON.stringify(exp,null,2));
+      });
+      const blob=await zip.generateAsync({type:"blob"});
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);
+      a.download=`warroom-batch-${series}-${d}-x${count}.zip`;
+      a.click();
+    }
+  }catch(e){
+    console.error("Zip error:",e);
+    // Fallback: download individually
+    alert("JSZip not loaded. Files were auto-saved individually.");
+  }
+
+  S.batchRunning=false;
+  S.batchProgress={current:0,total:0};
+  render();
+}
+
+function cancelBatch(){
+  S.batchRunning=false;
+  stopRequested=true;
+}
+
+// ═══════════════════════════════════════
+// RENDER HELPERS
+// ═══════════════════════════════════════
+function h(tag,attrs,...ch){
+  const el=document.createElement(tag);
+  if(attrs)Object.entries(attrs).forEach(([k,v])=>{
+    if(k==="style"&&typeof v==="object")Object.assign(el.style,v);
+    else if(k.startsWith("on"))el.addEventListener(k.slice(2).toLowerCase(),v);
+    else if(k==="className")el.className=v;
+    else el.setAttribute(k,v);
+  });
+  ch.flat(Infinity).forEach(c=>{if(c!=null)el.appendChild(typeof c==="string"?document.createTextNode(c):c)});
+  return el;
+}
+function renderMention(text){
+  return text.split(/(@\w+)/g).map(p=>{
+    if(p.startsWith("@")){const k=p.slice(1).toLowerCase(),m=getModels()[k];
+      const s=document.createElement("span");s.textContent=p;s.className="mention";
+      s.style.color=m?m.color:"var(--acc)";s.style.background=m?m.color+"15":"rgba(232,160,35,.1)";return s;}
+    return document.createTextNode(p);
+  });
+}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+function render(){
+  const app=document.getElementById("app");app.innerHTML="";
+  const act=activeKeys();
+
+  // HEADER
+  const seriesTag=S.seriesPreset?` · S-${S.seriesPreset}`:"";
+  app.appendChild(h("div",{className:"hdr"},
+    h("div",{className:"hdr-l"},
+      h("button",{className:"hb",style:{fontSize:"15px",padding:"4px 7px",marginRight:"2px"},onClick:()=>{S.sideOpen=true;render()}},"☰"),
+      h("div",{className:"logo"},"⚔"),
+      h("div",null,
+        h("div",{className:"hdr-t"},"War Room"),
+        h("div",{className:"hdr-s"},`${act.length} agents · ${S.freeMode?"Free mode":"Single round"}${seriesTag} · Groq`))),
+    h("div",{className:"hdr-r"},
+      h("div",{className:"run-b"},`Run #${S.runCount}`),
+      S.batchRunning?h("div",{className:"run-b",style:{color:"var(--grn)"}},`Batch ${S.batchProgress.current}/${S.batchProgress.total}`):null,
+      busy?h("button",{className:"hb",style:{background:"rgba(239,68,68,.15)",color:"var(--red)",padding:"4px 10px"},onClick:()=>{
+        stopRequested=true;
+        S.msgs.push({id:Date.now()+"_stop",sender:"system",text:"⏹ Stopped manually.",time:timeNow()});
+        render();
+      }},"⏹ Stop"):h("button",{className:"hb",title:"Shuffle agent order",onClick:shuffleOrder},"🔀"),
+      h("button",{className:"hb",style:{background:"rgba(232,160,35,.15)",color:"var(--acc)",padding:"4px 10px"},title:"Save experiment",onClick:()=>{if(S.msgs.length)saveExperiment();else alert("No messages to save")}},"💾 Save"),
+      h("button",{className:"hb",onClick:()=>{S.showSettings=true;render()}},"⚙"),
+      S.msgs.length?h("button",{className:"hb",style:{marginLeft:"8px",color:"var(--red)"},onClick:()=>{if(confirm("Clear chat?")){S.msgs=[];S.statuses={};render()}}},"🗑"):null)));
+
+  const bod=h("div",{className:"bod"});
+
+  // SIDEBAR
+  const side=h("div",{className:"side"+(S.sideOpen?" open":"")});
+
+  // Mobile overlay
+  if(S.sideOpen){
+    const sov=h("div",{className:"side-ov show",onClick:()=>{S.sideOpen=false;render()}});
+    bod.appendChild(sov);
+  }
+
+  // ══ Feature 1: CONDITION SELECTOR ══
+  const presetSec=h("div",{style:{padding:"8px 8px 4px",borderBottom:"1px solid var(--brd)"}});
+  presetSec.appendChild(h("div",{className:"side-t"},"⚗ Condition"));
+  const presetSel=h("select",{className:"preset-sel",onChange:e=>{applyPreset(e.target.value)}});
+  Object.entries(SERIES_PRESETS).forEach(([key,p])=>{
+    const opt=h("option",{value:key},p.label);
+    if(key===S.seriesPreset) opt.selected=true;
+    presetSel.appendChild(opt);
+  });
+  presetSec.appendChild(presetSel);
+  if(S.seriesPreset && SERIES_PRESETS[S.seriesPreset]){
+    presetSec.appendChild(h("div",{className:"mode-info",style:{color:"var(--acc)"}},SERIES_PRESETS[S.seriesPreset].desc));
+  }
+  // Show active overrides
+  const overrides=[];
+  if(S.useRealNames) overrides.push("Real names");
+  if(S.customTemp) overrides.push(`Temp ${S.customTemp}`);
+  if(S.promptAblation) overrides.push(`Ablation: ${S.promptAblation}`);
+  if(overrides.length){
+    presetSec.appendChild(h("div",{className:"mode-info",style:{color:"#F59E0B",marginTop:"2px"}},overrides.join(" · ")));
+  }
+  side.appendChild(presetSec);
+
+  side.appendChild(h("div",{className:"side-t"},`Agents (${act.length})`));
+
+
+  const list=h("div",{className:"ag-list"});
+  S.order.forEach((k,i)=>{
+    if(!getModels()[k])return;
+    const m=getModels()[k],on=S.enabled[k];
+    const st=S.statuses[k]||"idle";
+    const dotColor=!on?"#333":st==="typing"?"var(--acc)":st==="done"?"var(--grn)":st==="error"?"var(--red)":"#555";
+
+    const ag=h("div",{className:"ag",
+      style:{opacity:on?"1":".3"}},
+      h("div",{className:"ag-mv"},
+        h("button",{onClick:e=>{e.stopPropagation();moveUp(k)},title:"Move up"},"▲"),
+        h("button",{onClick:e=>{e.stopPropagation();moveDown(k)},title:"Move down"},"▼")),
+      h("div",{className:"ag-o"},on?`${i+1}`:"–"),
+      h("div",{className:"ag-av",style:{background:m.gradient}},m.avatar),
+      h("div",{className:"ag-i"},
+        h("div",{className:"ag-n",style:{color:on?m.color:"#999"}},m.name),
+        h("div",{className:"ag-tg"},m.tag)),
+      h("div",{className:"ag-dot",style:{background:dotColor,cursor:"pointer",width:"10px",height:"10px"},
+        title:on?"Click to disable":"Click to enable",
+        onClick:e=>{e.stopPropagation();S.enabled[k]=!S.enabled[k];save();render()}}));
+    list.appendChild(ag);
+  });
+  side.appendChild(list);
+
+  // == EXPERIMENT SETTINGS ==
+  const modeSec=h("div",{className:"mode-sec"});
+  modeSec.appendChild(h("div",{className:"side-t"},"Experiment"));
+
+  // Helper: badge dot
+  const badge=(color)=>h("span",{style:{display:"inline-block",width:"6px",height:"6px",borderRadius:"50%",background:color,marginRight:"5px",flexShrink:"0"}});
+
+  // RED: Statuses (changes what agents see)
+  const statusRow=h("div",{className:"mode-row",style:{marginTop:"4px"}});
+  statusRow.appendChild(badge("#EF4444"));
+  statusRow.appendChild(h("span",{className:"mode-label"},S.showStatuses?"Statuses ON":"Statuses OFF"));
+  const sTog=h("button",{className:"toggle "+(S.showStatuses?"on":"off"),onClick:()=>{
+    S.showStatuses=!S.showStatuses;S.seriesPreset="";save();render();
+  }});
+  statusRow.appendChild(sTog);
+  modeSec.appendChild(statusRow);
+  modeSec.appendChild(h("div",{className:"mode-info",style:{paddingLeft:"11px"}},"Agents see typing/done/error status"));
+
+  // RED: DateTime (changes what agents see)
+  const dtRow=h("div",{className:"mode-row",style:{marginTop:"4px"}});
+  dtRow.appendChild(badge("#EF4444"));
+  dtRow.appendChild(h("span",{className:"mode-label"},S.showDateTime?"DateTime ON":"DateTime OFF"));
+  const dtTog=h("button",{className:"toggle "+(S.showDateTime?"on":"off"),onClick:()=>{
+    S.showDateTime=!S.showDateTime;S.seriesPreset="";save();render();
+  }});
+  dtRow.appendChild(dtTog);
+  modeSec.appendChild(dtRow);
+  modeSec.appendChild(h("div",{className:"mode-info",style:{paddingLeft:"11px"}},"Agents see current time each round"));
+
+  // YELLOW: Free mode (changes conversation structure)
+  const modeRow=h("div",{className:"mode-row",style:{marginTop:"8px"}});
+  modeRow.appendChild(badge("#F59E0B"));
+  modeRow.appendChild(h("span",{className:"mode-label"},S.freeMode?"Free mode":"Single round"));
+  const tog=h("button",{className:"toggle "+(S.freeMode?"on":"off"),onClick:()=>{
+    S.freeMode=!S.freeMode;S.seriesPreset="";save();render();
+  }});
+  modeRow.appendChild(tog);
+  modeSec.appendChild(modeRow);
+  modeSec.appendChild(h("div",{className:"mode-info",style:{paddingLeft:"11px"}},S.freeMode?"Multi-round conversation":"One response per agent"));
+
+  // YELLOW: Max Rounds
+  const mrRow=h("div",{className:"mode-row",style:{marginTop:"4px"}});
+  mrRow.appendChild(badge("#F59E0B"));
+  mrRow.appendChild(h("span",{className:"mode-label"},"Max Rounds"));
+  const mrInput=h("input",{type:"number",min:"1",max:"50",value:MAX_ROUNDS,
+    style:{width:"42px",padding:"2px 4px",fontSize:"11px",background:"var(--s1)",color:"var(--tx)",border:"1px solid var(--brd)",borderRadius:"6px",textAlign:"center"},
+    oninput:e=>{const v=parseInt(e.target.value);if(v>=1&&v<=50){MAX_ROUNDS=v;localStorage.setItem("wr3_maxrounds",String(v))}}
+  });
+  mrRow.appendChild(mrInput);
+  modeSec.appendChild(mrRow);
+  modeSec.appendChild(h("div",{className:"mode-info",style:{paddingLeft:"11px"}},"Hard stop after N rounds"));
+
+  // YELLOW: Remove errored agents
+  const reRow=h("div",{className:"mode-row",style:{marginTop:"4px"}});
+  reRow.appendChild(badge("#F59E0B"));
+  reRow.appendChild(h("span",{className:"mode-label"},S.removeErrored?"Drop errored":"Keep errored"));
+  const reTog=h("button",{className:"toggle "+(S.removeErrored?"on":"off"),onClick:()=>{
+    S.removeErrored=!S.removeErrored;S.seriesPreset="";save();render();
+  }});
+  reRow.appendChild(reTog);
+  modeSec.appendChild(reRow);
+  modeSec.appendChild(h("div",{className:"mode-info",style:{paddingLeft:"11px"}},S.removeErrored?"Errored agents excluded from next rounds":"All agents called every round"));
+
+  // GREEN: Real Names (Série C)
+  const rnRow=h("div",{className:"mode-row",style:{marginTop:"8px"}});
+  rnRow.appendChild(badge("#22C55E"));
+  rnRow.appendChild(h("span",{className:"mode-label"},S.useRealNames?"Real names":"Agent-X names"));
+  const rnTog=h("button",{className:"toggle "+(S.useRealNames?"on":"off"),onClick:()=>{
+    S.useRealNames=!S.useRealNames;S.seriesPreset="";save();render();
+  }});
+  rnRow.appendChild(rnTog);
+  modeSec.appendChild(rnRow);
+  modeSec.appendChild(h("div",{className:"mode-info",style:{paddingLeft:"11px"}},S.useRealNames?"Agents see real model names":"Agents see Agent-A/B/C..."));
+
+  // GREEN: Temperature
+  const tempRow=h("div",{className:"mode-row",style:{marginTop:"4px"}});
+  tempRow.appendChild(badge("#22C55E"));
+  tempRow.appendChild(h("span",{className:"mode-label"},"Temp: "+(S.customTemp||0.8)));
+  const tempInput=h("input",{type:"number",min:"0.1",max:"2.0",step:"0.05",value:S.customTemp||0.8,
+    style:{width:"50px",padding:"2px 4px",fontSize:"11px",background:"var(--s1)",color:"var(--tx)",border:"1px solid var(--brd)",borderRadius:"6px",textAlign:"center"},
+    oninput:e=>{const v=parseFloat(e.target.value);if(v>=0.1&&v<=2.0){S.customTemp=v===0.8?null:v;S.seriesPreset="";}}
+  });
+  tempRow.appendChild(tempInput);
+  modeSec.appendChild(tempRow);
+  modeSec.appendChild(h("div",{className:"mode-info",style:{paddingLeft:"11px"}},"0.8 = baseline · 0.95 = Série I"));
+
+  // GREEN: Prompt Ablation (K1/K2/K3)
+  const abRow=h("div",{className:"mode-row",style:{marginTop:"4px"}});
+  abRow.appendChild(badge("#22C55E"));
+  abRow.appendChild(h("span",{className:"mode-label"},"Prompt ablation"));
+  const abSel=h("select",{style:{width:"60px",padding:"2px",fontSize:"10px",background:"var(--s1)",color:"var(--tx)",border:"1px solid var(--brd)",borderRadius:"6px"},
+    onChange:e=>{S.promptAblation=e.target.value||null;S.seriesPreset="";render();}});
+  [{v:"",l:"Full"},{v:"K1",l:"K1"},{v:"K2",l:"K2"},{v:"K3",l:"K3"}].forEach(o=>{
+    const opt=h("option",{value:o.v},o.l);
+    if((S.promptAblation||"")===(o.v)) opt.selected=true;
+    abSel.appendChild(opt);
+  });
+  abRow.appendChild(abSel);
+  modeSec.appendChild(abRow);
+  const abDescs={K1:"No 'Other agents:' line",K2:"No 'You are {name}' line",K3:"Empty system prompt","":" Full 2-line prompt"};
+  modeSec.appendChild(h("div",{className:"mode-info",style:{paddingLeft:"11px"}},abDescs[S.promptAblation||""]||"Full prompt"));
+
+  side.appendChild(modeSec);
+
+  // Clone Mode section
+  const cloneSec=h("div",{className:"mode-sec"});
+  cloneSec.appendChild(h("div",{className:"side-t"},"🧬 Clone Mode"));
+  if(!S.cloneMode){
+    // Model selector
+    const sel=h("select",{style:{width:"100%",padding:"4px",fontSize:"11px",background:"var(--s1)",color:"var(--tx)",border:"1px solid var(--brd)",borderRadius:"6px",marginBottom:"4px"}});
+    sel.appendChild(h("option",{value:""},"Select model to clone..."));
+    Object.values(ALL_MODELS).forEach(m=>{
+      const opt=h("option",{value:m.model},m.name);
+      sel.appendChild(opt);
+    });
+    cloneSec.appendChild(sel);
+    // Count selector
+    const countRow=h("div",{style:{display:"flex",gap:"4px",marginBottom:"4px"}});
+    [3,4,5,6].forEach(n=>{
+      countRow.appendChild(h("button",{className:"log-btn",style:{flex:"1",fontSize:"10px"},onClick:()=>{
+        const modelId=sel.value;
+        if(!modelId){alert("Select a model first");return;}
+        activateCloneMode(modelId,n);
+      }},n+"x"));
+    });
+    cloneSec.appendChild(countRow);
+    cloneSec.appendChild(h("div",{className:"mode-info"},"Clone a single model into multiple agents"));
+  } else {
+    const srcName=Object.values(ALL_MODELS).find(m=>m.model===S.cloneModel)?.name||S.cloneModel;
+    cloneSec.appendChild(h("div",{className:"mode-info",style:{color:"var(--acc)"}},`Active: ${S.cloneCount}x ${srcName}`));
+    cloneSec.appendChild(h("button",{className:"log-btn",style:{marginTop:"4px",color:"var(--red)"},onClick:deactivateCloneMode},"✕ Exit clone mode"));
+  }
+  side.appendChild(cloneSec);
+
+  // ══ Feature 2: BATCH RUNNER ══
+  const batchSec=h("div",{className:"mode-sec"});
+  batchSec.appendChild(h("div",{className:"side-t"},"🔄 Batch Runner"));
+  if(!S.batchRunning){
+    const batchPromptInput=h("textarea",{placeholder:"Batch prompt...",rows:"2",
+      style:{width:"100%",padding:"6px",fontSize:"11px",background:"var(--s1)",color:"var(--tx)",border:"1px solid var(--brd)",borderRadius:"6px",resize:"vertical",fontFamily:"'DM Sans',sans-serif",minHeight:"36px",maxHeight:"80px",marginBottom:"4px"}});
+    // Set default prompt from last user message if available
+    const lastUserMsg=S.msgs.filter(m=>m.sender==="user").pop();
+    if(lastUserMsg) batchPromptInput.value=lastUserMsg.text;
+    batchSec.appendChild(batchPromptInput);
+    const countRow=h("div",{style:{display:"flex",gap:"4px",alignItems:"center"}});
+    const customInput=h("input",{type:"number",min:"1",max:"50",value:"15",
+      style:{width:"42px",padding:"4px",fontSize:"11px",background:"var(--s1)",color:"var(--tx)",border:"1px solid var(--brd)",borderRadius:"6px",textAlign:"center"}});
+    countRow.appendChild(customInput);
+    const goBtn=h("button",{className:"log-btn",style:{flex:"1",fontSize:"10px",color:"var(--acc)",fontWeight:"600"},onClick:()=>{
+      const prompt=batchPromptInput.value.trim();
+      const n=parseInt(customInput.value);
+      if(!prompt){alert("Enter a batch prompt first");return;}
+      if(!n||n<1||n>50){alert("Enter a number between 1 and 50");return;}
+      if(!confirm(`Run ${n} sequential experiments?\nSeries: ${S.seriesPreset||"Custom"}\nPrompt: "${prompt.substring(0,60)}..."`)) return;
+      runBatch(prompt,n);
+    }},"▶ Run");
+    countRow.appendChild(goBtn);
+    batchSec.appendChild(countRow);
+    const presetRow=h("div",{style:{display:"flex",gap:"3px",marginTop:"3px"}});
+    [5,10,15,20].forEach(n=>{
+      presetRow.appendChild(h("button",{className:"log-btn",style:{flex:"1",fontSize:"9px",opacity:".7"},onClick:()=>{customInput.value=n}},`${n}`));
+    });
+    batchSec.appendChild(presetRow);
+    batchSec.appendChild(h("div",{className:"mode-info"},"Set count → Run. Exports zip."));
+  } else {
+    // Progress display
+    const pct=Math.round((S.batchProgress.current/S.batchProgress.total)*100);
+    batchSec.appendChild(h("div",{className:"mode-info",style:{color:"var(--acc)",fontWeight:"600"}},
+      `Running ${S.batchProgress.current}/${S.batchProgress.total}...`));
+    const bar=h("div",{className:"batch-bar"});
+    bar.appendChild(h("div",{className:"batch-fill",style:{width:pct+"%"}}));
+    batchSec.appendChild(bar);
+    batchSec.appendChild(h("button",{className:"log-btn",style:{marginTop:"6px",color:"var(--red)"},onClick:cancelBatch},"⏹ Cancel batch"));
+  }
+  side.appendChild(batchSec);
+
+  // Log export
+  if(S.msgs.length>0){
+    const logSec=h("div",{className:"log-sec"});
+    logSec.appendChild(h("button",{className:"log-btn",onClick:saveExperiment},"💾 Save this experiment"));
+    side.appendChild(logSec);
+  }
+
+  side.appendChild(h("div",{className:"side-h"},"▲▼ to reorder"));
+  bod.appendChild(side);
+
+  // CHAT COLUMN
+  const chatCol=h("div",{className:"chat-col"});
+  const chat=h("div",{className:"chat"});
+
+  if(!S.key){
+    chat.appendChild(h("div",{className:"empty"},
+      h("div",{style:{fontSize:"42px",marginBottom:"12px"}},"⚔"),
+      h("div",{style:{fontSize:"17px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",marginBottom:"6px"}},"War Room Lab"),
+      h("div",{style:{fontSize:"13px",color:"var(--tx2)",lineHeight:"1.6",marginBottom:"16px"}},"Multi-agent group chat with drag-drop ordering and experiment logging."),
+      h("button",{style:{padding:"10px 24px",borderRadius:"10px",border:"none",background:"linear-gradient(135deg,var(--acc),#B45309)",color:"#fff",cursor:"pointer",fontSize:"13px",fontWeight:600},
+        onClick:()=>{S.showSettings=true;render()}},"⚡ Connect API Key")));
+  } else if(!S.msgs.length){
+    chat.appendChild(h("div",{className:"empty"},
+      h("div",{style:{fontSize:"28px",marginBottom:"10px",opacity:".7"}},"💬"),
+      h("div",{style:{fontSize:"13px",color:"var(--tx2)",lineHeight:"1.6"}},"Type a message. Use @all or @agent to target.")));
+  } else {
+    S.msgs.forEach(msg=>{
+      if(msg.sender==="system"){chat.appendChild(h("div",{className:"sys"},msg.text));return;}
+      const isU=msg.sender==="user",m=getModels()[msg.sender];
+      const row=h("div",{className:"msg-r"+(isU?" usr":"")});
+      row.appendChild(h("div",{className:"av",style:{background:isU?"var(--acc)":(m?.gradient||"#333")}},isU?"H":(m?.avatar||"?")));
+      const cnt=h("div",{className:"msg-c"});
+      if(!isU) cnt.appendChild(h("div",{className:"msg-nm",style:{color:m?.color||"#999"}},m?.name||msg.sender,h("span",{className:"msg-tg"},m?.tag||"")));
+      const isDoneMsg=!isU&&msg.text?.trim().toUpperCase()==="[DONE]";
+      const bub=h("div",{className:"bub "+(isU?"ub":"ai")+(msg.text?.startsWith("⚠")?" err":"")+(isDoneMsg?" done":"")});
+      if(msg.isVoice) bub.appendChild(document.createTextNode("🎤 "));
+      if(isU) bub.appendChild(document.createTextNode(msg.text));
+      else renderMention(msg.text).forEach(n=>bub.appendChild(n));
+      cnt.appendChild(bub);
+      cnt.appendChild(h("div",{className:"msg-tm"},msg.time));
+      row.appendChild(cnt);chat.appendChild(row);
+    });
+  }
+
+  // Typing
+  if(S.typing.length){
+    const typ=h("div",{className:"typing"},
+      h("div",{style:{display:"flex",gap:"2px"}},...S.typing.map(k=>h("div",{style:{width:"18px",height:"18px",borderRadius:"5px",background:getModels()[k].gradient,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"8px",fontWeight:700}},getModels()[k].avatar))),
+      h("i",null,S.typing.map(k=>getModels()[k].name).join(", ")+(S.typing.length===1?" typing":" typing")),
+      h("span",{className:"t-d"},h("span",null,"."),h("span",null,"."),h("span",null,".")));
+    chat.appendChild(typ);
+  }
+
+  chatCol.appendChild(chat);
+  requestAnimationFrame(()=>{
+    chat.scrollTop=chat.scrollHeight;
+    // Restore textarea content after re-render
+    const ta=document.getElementById("ta");
+    if(ta&&S._taVal!==undefined){
+      ta.value=S._taVal;
+      ta.selectionStart=ta.selectionEnd=S._taCur||S._taVal.length;
+      ta.style.height="48px";
+      ta.style.height=Math.min(ta.scrollHeight,140)+"px";
+      S._taVal=undefined;S._taCur=undefined;
+    }
+  });
+
+  // INPUT
+  if(S.key){
+    const inp=h("div",{className:"inp"});
+    const row=h("div",{className:"inp-r"});
+
+    row.appendChild(h("button",{className:"ibtn",style:{
+      background:S.recording?"linear-gradient(135deg,#EF4444,#DC2626)":"var(--s1)",
+      color:S.recording?"#fff":"var(--tx2)",
+      animation:S.recording?"rec 1.5s infinite":"none"},
+      onMousedown:startRec,onMouseup:stopRec,
+      onMouseleave:()=>{if(S.recording)stopRec()},
+      onTouchstart:e=>{e.preventDefault();startRec()},
+      onTouchend:e=>{e.preventDefault();stopRec()}},"🎤"));
+
+    row.appendChild(h("textarea",{id:"ta",placeholder:"Message the War Room... (@ to mention)",rows:"1",
+      onInput:e=>{
+        e.target.style.height="48px";
+        e.target.style.height=Math.min(e.target.scrollHeight,140)+"px";
+        const v=e.target.value,c=e.target.selectionStart,b=v.substring(0,c),at=b.lastIndexOf("@");
+        const show=at!==-1&&at>=b.length-12&&!b.substring(at).includes(" ");
+        if(show!==S.showMention){
+          S.showMention=show;
+          S._taVal=e.target.value;
+          S._taCur=e.target.selectionStart;
+          render();
+        }
+      },
+      onKeydown:e=>{
+        if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();const v=e.target.value;e.target.value="";S.showMention=false;send(v);}
+      }}));
+
+    const canSend=!busy;
+    row.appendChild(h("button",{className:"ibtn",style:{
+      background:canSend?"linear-gradient(135deg,var(--acc),#B45309)":"var(--s1)",
+      color:canSend?"#fff":"var(--tx2)"},
+      onClick:()=>{const ta=document.getElementById("ta");const v=ta.value;ta.value="";S.showMention=false;send(v);}},"↑"));
+
+    inp.appendChild(row);
+    chatCol.appendChild(inp);
+  }
+
+  bod.appendChild(chatCol);
+  app.appendChild(bod);
+
+  // MENTION MENU
+  if(S.showMention){
+    const mm=h("div",{className:"mm"},
+      ...[["all",{name:"Everyone",avatar:"★",gradient:"linear-gradient(135deg,var(--acc),#EC4899)"}],
+        ...S.order.filter(k=>S.enabled[k]).map(k=>[k,getModels()[k]])
+      ].map(([key,model])=>h("button",{className:"mi",onClick:()=>{
+        const ta=document.getElementById("ta"),v=ta.value,at=v.lastIndexOf("@");
+        ta.value=v.substring(0,at)+"@"+key+" ";S.showMention=false;render();ta.focus();
+      }},
+        h("div",{style:{width:"20px",height:"20px",borderRadius:"5px",background:model.gradient||model.color,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"9px",fontWeight:700,flexShrink:0}},model.avatar),
+        h("span",{style:{fontFamily:"'JetBrains Mono',monospace",fontWeight:600,fontSize:"12px"}},"@"+key),
+        h("span",{style:{color:"var(--tx2)",fontSize:"11px",marginLeft:"auto"}},model.name))));
+    app.appendChild(mm);
+  }
+
+  // OVERLAYS
+  if(S.recording) app.appendChild(h("div",{className:"ov",style:{background:"#1A0808",border:"1px solid rgba(239,68,68,.3)"}},
+    h("div",{style:{width:"10px",height:"10px",borderRadius:"50%",background:"var(--red)",animation:"pulse 1s infinite"}}),
+    h("span",{style:{color:"var(--red)",fontFamily:"'JetBrains Mono',monospace",fontSize:"13px",fontWeight:600}},
+      `${Math.floor(S.recDur/60)}:${(S.recDur%60).toString().padStart(2,"0")}`),
+    h("button",{style:{background:"rgba(255,255,255,.1)",border:"none",borderRadius:"7px",color:"#999",cursor:"pointer",padding:"3px 9px",fontSize:"11px"},onClick:cancelRec},"Cancel")));
+
+  if(S.transcribing) app.appendChild(h("div",{className:"ov",style:{background:"var(--s1)",border:"1px solid rgba(232,160,35,.2)"}},
+    h("span",{style:{fontSize:"14px"}},"🎤"),
+    h("span",{style:{color:"var(--acc)",fontSize:"12px"}},"Whisper transcribing...")));
+
+  // SETTINGS MODAL
+  if(S.showSettings){
+    let tk=S.key;
+    const close=()=>{S.showSettings=false;render()};
+    app.appendChild(h("div",{className:"mo-bg",onClick:close},
+      h("div",{className:"mo",onClick:e=>e.stopPropagation()},
+        h("h2",null,"⚡ Settings"),
+        h("label",null,"Groq API Key"),
+        h("input",{type:"password",placeholder:"gsk_...",value:tk,onInput:e=>{tk=e.target.value}}),
+        h("label",null,"Whisper Model"),
+        h("div",{style:{display:"flex",gap:"6px",marginBottom:"16px",marginTop:"4px"}},
+          ...Object.entries({"whisper-large-v3":"V3 (precise)","whisper-large-v3-turbo":"Turbo (fast)"}).map(([id,label])=>{
+            const active=S.whisper===id;
+            return h("button",{style:{flex:"1",padding:"8px",borderRadius:"8px",border:"none",cursor:"pointer",fontSize:"11px",
+              background:active?"rgba(232,160,35,.15)":"var(--s2)",color:active?"var(--acc)":"var(--tx2)",
+              fontWeight:active?"600":"400",outline:active?"1px solid rgba(232,160,35,.3)":"1px solid var(--brd)"},
+              onClick:()=>{S.whisper=id;localStorage.setItem("wr3_w",id);render()}},label)})),
+        h("div",{className:"mo-a"},
+          h("button",{className:"bc",onClick:close},"Cancel"),
+          h("button",{className:"bs",onClick:()=>{
+            S.key=tk.replace(/[^\x20-\x7E]/g,"").trim();
+            localStorage.setItem("wr3_key",S.key);close();}},"Save")))));
+  }
+}
+
+render();
+</script>
+</body>
+</html>
