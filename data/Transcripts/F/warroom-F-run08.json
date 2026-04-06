@@ -1,0 +1,266 @@
+{
+  "condition": {
+    "label": "F",
+    "series": "F",
+    "statusesVisible": false,
+    "dateTimeVisible": false,
+    "removeErrored": true,
+    "mode": "single",
+    "temperature": 0.8,
+    "promptAblation": null,
+    "useRealNames": false,
+    "isolatedMode": true,
+    "cloneMode": false
+  },
+  "environment": {
+    "id": "run-12-2026-03-04T12-00-25",
+    "date": "04/03/2026",
+    "time": "12:00:25",
+    "timestamp": "2026-03-04T12:00:25.342Z",
+    "runNumber": 12,
+    "mode": "single",
+    "statusesVisible": false,
+    "dateTimeVisible": false,
+    "staggerMs": 1200,
+    "maxRounds": 1,
+    "removeErrored": true,
+    "agentRanking": [
+      {
+        "position": 1,
+        "key": "llama",
+        "name": "LLaMA 3.3 70B",
+        "nickname": "Agent-A",
+        "model": "llama-3.3-70b-versatile",
+        "personality": "Balanced all-rounder. Strong reasoning, broad knowledge, reliable.",
+        "enabled": true
+      },
+      {
+        "position": 2,
+        "key": "gptoss",
+        "name": "GPT-OSS 120B",
+        "nickname": "Agent-B",
+        "model": "openai/gpt-oss-120b",
+        "personality": "OpenAI's flagship open-weight model. Excellent reasoning and analysis.",
+        "enabled": true
+      },
+      {
+        "position": 3,
+        "key": "gptoss20",
+        "name": "GPT-OSS 20B",
+        "nickname": "Agent-C",
+        "model": "openai/gpt-oss-20b",
+        "personality": "Fast and efficient. Lightweight reasoning, quick responses, good for rapid tasks.",
+        "enabled": true
+      },
+      {
+        "position": 4,
+        "key": "maverick",
+        "name": "LLaMA 4 Maverick",
+        "nickname": "Agent-D",
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct",
+        "personality": "High-capacity MoE with 128 experts. Creative, multimodal, strong reasoning.",
+        "enabled": true
+      },
+      {
+        "position": 5,
+        "key": "kimi",
+        "name": "Kimi K2",
+        "nickname": "Agent-E",
+        "model": "moonshotai/kimi-k2-instruct-0905",
+        "personality": "Strong structured reasoning and creative problem solving.",
+        "enabled": true
+      },
+      {
+        "position": 6,
+        "key": "qwen",
+        "name": "Qwen3 32B",
+        "nickname": "Agent-F",
+        "model": "qwen/qwen3-32b",
+        "personality": "Deep analytical thinker. Methodical reasoning, strong at structured problems and logic.",
+        "enabled": true
+      },
+      {
+        "position": 7,
+        "key": "deepseek",
+        "name": "DeepSeek R1",
+        "nickname": "Agent-G",
+        "model": "deepseek-r1-distill-llama-70b",
+        "personality": "Reasoning specialist. Chain-of-thought, analytical, methodical thinker.",
+        "enabled": true
+      },
+      {
+        "position": 8,
+        "key": "scout",
+        "name": "LLaMA 4 Scout",
+        "nickname": "Agent-H",
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "personality": "Fast and lightweight. Quick takes, validation, good for rapid iteration.",
+        "enabled": true
+      }
+    ],
+    "activeAgents": [
+      "#1 LLaMA 3.3 70B",
+      "#2 GPT-OSS 120B",
+      "#3 GPT-OSS 20B",
+      "#4 LLaMA 4 Maverick",
+      "#5 Kimi K2",
+      "#6 Qwen3 32B",
+      "#7 DeepSeek R1",
+      "#8 LLaMA 4 Scout"
+    ],
+    "disabledAgents": [],
+    "systemPromptTemplate": "You are an AI assistant."
+  },
+  "conversation": {
+    "userPrompt": "On a un client qui veut une app mobile de livraison de repas pour une ville de 500k habitants. Budget: 50k EUR, deadline: 3 mois. Proposez votre analyse.",
+    "messages": [
+      {
+        "sender": "user",
+        "time": "12:00",
+        "text": "On a un client qui veut une app mobile de livraison de repas pour une ville de 500k habitants. Budget: 50k EUR, deadline: 3 mois. Proposez votre analyse.",
+        "wordCount": 28
+      },
+      {
+        "sender": "gptoss",
+        "time": "12:00",
+        "agent": "GPT-OSS 120B",
+        "agent_nickname": "Agent-B",
+        "model_id": "openai/gpt-oss-120b",
+        "position": 2,
+        "round": 0,
+        "text": "## Analyse pré‑liminaire du projet  \n**Client** : start‑up/entreprise souhaitant lancer une application mobile de livraison de repas dans une ville de ≈ 500 000 habitants.  \n**Budget** : **50 k EUR** (tout compris : conception, développement, tests, mise en production, support initial).  \n**Deadline** : **3 mois** (≈ 12 semaines).  \n\n---\n\n## 1. Objectifs business & fonctionnels\n\n| Objectif | Description |\n|----------|-------------|\n| **Mise sur le marché rapide** | Lancer une version MVP (Minimum Viable Product) afin de valider le concept et d’acquérir les premiers utilisateurs. |\n| **Expérience utilisateur fluide** | Parcours simple : inscription → sélection du restaurant → panier → paiement → suivi de la livraison. |\n| **Scalabilité** | Architecture permettant d’ajouter rapidement de nouveaux restaurants, zones de couverture et fonctionnalités (programme de fidélité, promos, etc.). |\n| **Coût maîtrisé** | Utiliser des technologies et services qui limitent les dépenses de développement et d’infrastructure. |\n| **Respect du délai** | Prioriser les livrables essentiels et adopter une méthodologie agile (sprints de 1 semaine). |\n\n---\n\n## 2. Scope recommandé (MVP)\n\n| Fonctionnalité | Niveau de détail (MVP) | Priorité |\n|----------------|------------------------|----------|\n| **Inscription / connexion** | Email + mot de passe + connexion via Google/Apple (OAuth). | Haute |\n| **Profil client** | Adresse principale, numéro de téléphone, préférences alimentaires. | Haute |\n| **Liste de restaurants** | Géolocalisation (Google Maps / OpenStreetMap) → affichage des restaurants à proximité (max ≈ 20 km). | Haute |\n| **Menu & filtres** | Catalogue simple (photo, description, prix, disponibilité). Filtres : type de cuisine, notation. | Haute |\n| **Panier** | Ajout/suppression d’articles, calcul du total, frais de livraison fixes. | Haute |\n| **Paiement** | Intégration Stripe / PayPal (paiement par carte, Apple/Google Pay). | Haute |\n| **Suivi de commande** | Statut (préparé, en cours de livraison, livré) + carte en temps réel du livreur (via API de géoloc). | Haute |\n| **Notifications push** | Confirmation de commande, changement de statut, promotions. | Moyenne |\n| **Évaluation** | Notation du restaurant et du livreur (1‑5 étoiles). | Moyenne |\n| **Back‑office (Web)** | Tableau de bord admin : gestion des restaurants, menus, commandes, utilisateurs, rapports de ventes. | Haute (mais version simplifiée) |\n| **Gestion des livreurs** | Inscription, activation, visualisation des livraisons en cours. (MVP : interface très basique) | Moyenne |\n| **Support / FAQ** | Page statique + formulaire de contact (email). | Faible |\n\n> **Ce qui est exclu du MVP** : programme de fidélité, promotions avancées, paiement en espèces,",
+        "wordCount": 418,
+        "isError": false,
+        "language_detected": "unknown",
+        "mentions": []
+      },
+      {
+        "sender": "gptoss20",
+        "time": "12:00",
+        "agent": "GPT-OSS 20B",
+        "agent_nickname": "Agent-C",
+        "model_id": "openai/gpt-oss-20b",
+        "position": 3,
+        "round": 0,
+        "text": "## Analyse de la demande – Application mobile de livraison de repas  \n### Contexte\n- **Client** : plateforme de livraison de repas  \n- **Cible** : ville de 500 000 habitants  \n- **Budget** : 50 000 € (net)  \n- **Délais** : 3 mois (≈ 12 semaines)  \n- **Objectif** : livrer un produit viable (MVP) capable d’être lancé rapidement, avec un plan d’évolution clair.\n\n---\n\n## 1. Feasibility & Scope\n\n| Critère | Évaluation | Recommandation |\n|---------|------------|----------------|\n| **Complexité fonctionnelle** | Moyen – besoin de gestion des restaurants, commandes, paiement, suivi, notifications. | Limiter le périmètre au **MVP** : catalogue, panier, paiement, suivi en temps réel, compte client. |\n| **Volume d’utilisateurs** | 500 k habitants → 5 %‑10 % d’adoption initiale = 25 k‑50 k utilisateurs actifs. | Commencer avec un **pilot** de 5 k‑10 k utilisateurs dans une zone géographique restreinte. |\n| **Intégrations externes** | Paiement (Stripe/PayPal), cartographie (Google Maps/Mapbox), SMS/Push (Twilio/Firebase). | Utiliser des API tierces (Stripe, Google Maps) pour réduire le temps de développement. |\n| **Infrastructure** | Backend scalable (cloud), base de données relationnelle ou NoSQL, API REST/GraphQL. | Opter pour une solution BaaS (Firebase, Supabase) + fonctions serverless pour un coût maîtrisé. |\n| **Sécurité & Conformité** | PCI‑DSS (paiement), RGPD (données personnelles). | Implémenter OAuth2, HTTPS, stockage chiffré, audit des logs. |\n\n---\n\n## 2. Architecture proposée (cross‑platform)\n\n```\n+-----------------+          +------------------+\n|  Mobile Client  | <----->  |  API Gateway     |\n|  (Flutter/React |          |  (FastAPI / Node)|\n|   Native)       |          |  (JWT Auth)      |\n+--------+--------+          +--------+---------+\n         |                           |\n         |                           |\n+--------v--------+          +------v-------+\n|  Backend Logic  |          |  Database    |\n|  (Serverless /  |          |  (PostgreSQL)|\n|   Cloud Functions) |       +--------------+\n+------------------+\n```\n\n- **Front‑end** : Flutter (ou React Native) → développement simultané iOS/Android, UI/UX homogène.  \n- **Back‑end** : Fast",
+        "wordCount": 296,
+        "isError": false,
+        "language_detected": "unknown",
+        "mentions": []
+      },
+      {
+        "sender": "maverick",
+        "time": "12:00",
+        "agent": "LLaMA 4 Maverick",
+        "agent_nickname": "Agent-D",
+        "model_id": "meta-llama/llama-4-maverick-17b-128e-instruct",
+        "position": 4,
+        "round": 0,
+        "text": "**Analyse de faisabilité pour une application mobile de livraison de repas**\n\n**Introduction**\n\nNotre client souhaite développer une application mobile de livraison de repas pour une ville de 500 000 habitants. Le budget alloué est de 50 000 EUR et la deadline est de 3 mois. Dans ce document, nous allons analyser la faisabilité de ce projet en tenant compte des exigences du client, des contraintes techniques et des risques potentiels.\n\n**Exigences du client**\n\n* Développement d'une application mobile de livraison de repas\n* Ville de 500 000 habitants\n* Budget : 50 000 EUR\n* Deadline : 3 mois\n\n**Analyse fonctionnelle**\n\n* L'application doit permettre aux utilisateurs de :\n + Commander des repas en ligne\n + Choisir parmi une variété de restaurants partenaires\n + Suivre l'état de leur commande en temps réel\n + Effectuer des paiements en ligne sécurisés\n* L'application doit également permettre aux restaurants partenaires de :\n + Gérer leurs menus et leurs disponibilités\n + Recevoir et traiter les commandes en ligne\n + Suivre les statistiques de ventes et de performances\n\n**Contraintes techniques**\n\n* Développement pour les plateformes iOS et Android\n* Utilisation de technologies telles que React Native ou Flutter pour une mise en œuvre rapide et efficace\n* Intégration avec des passerelles de paiement sécurisées (par exemple, Stripe, PayPal)\n* Nécessité d'une infrastructure back-end robuste pour gérer les données et les commandes\n\n**Risques potentiels**\n\n* **Délais serrés** : 3 mois peuvent être un délai court pour développer une application mobile complexe, surtout si l'on considère les tests et les corrections de bugs.\n* **Budget limité** : 50 000 EUR peuvent ne pas être suffisants pour développer une application de haute qualité avec toutes les fonctionnalités souhaitées.\n* **Intégration avec les restaurants partenaires** : La réussite de l'application dépend de la capacité à convaincre les restaurants de s'associer au service.\n\n**Plan d'action**\n\n1. **Semaine 1-2** : Définition des exigences détaillées et création d'un prototype de l'application.\n2. **Semaine 3-6** : Développement de l'application back-end et de l'API.\n3. **Semaine 7-10** : Développement de l'application mobile pour iOS et Android.\n4. **Semaine 11-12** : Tests et débogage de l'application.\n5. **Semaine 13** : Lancement de l'application et déploiement.\n\n**Budget détaillé**\n\n* Développement de l'application : 30 000 EUR (60% du budget)\n* Conception et design : 5 000 EUR (10% du budget)\n* Tests et débogage : 5 000 EUR (10% du budget)\n* Infrastructure et maintenance : 5 000 EUR (10% du budget)\n* Marketing et lancement : 5 000 EUR (10% du budget)\n\n**Conclusion**\n\nLe développement d'une application mobile de livraison de repas pour une ville de 500 000 habitants dans un délai de 3 mois et avec un budget de 50 000 EUR est un défi. Cependant, avec une planification minutieuse, une équipe de développement expérimentée et une gestion de projet efficace, il est possible de livrer une application de qualité qui répond aux besoins du client. Nous recommandons de prioriser les fonctionnalités essentielles et de se concentrer sur la mise en œuvre d'une solution robuste et évolutive.",
+        "wordCount": 503,
+        "isError": false,
+        "language_detected": "fr",
+        "mentions": []
+      },
+      {
+        "sender": "llama",
+        "time": "12:00",
+        "agent": "LLaMA 3.3 70B",
+        "agent_nickname": "Agent-A",
+        "model_id": "llama-3.3-70b-versatile",
+        "position": 1,
+        "round": 0,
+        "text": "**Analyse du Projet d'App Mobile de Livraison de Repas**\n\n**Introduction**\n\nLe client souhaite développer une application mobile de livraison de repas pour une ville de 500 000 habitants, avec un budget de 50 000 euros et un délai de 3 mois. Dans cette analyse, nous allons évaluer les exigences du projet, les défis potentiels et les solutions possibles pour répondre aux besoins du client.\n\n**Exigences du Projet**\n\n1. **Fonctionnalités** :\n * Inscription et connexion des utilisateurs\n * Recherche et selection de restaurants et de plats\n * Commande et paiement en ligne\n * Suivi de la commande et notification de livraison\n * Gestion des restaurants et des menus\n2. **Platforms** :\n * Développement d'une application mobile pour les systèmes d'exploitation Android et iOS\n3. **Intégrations** :\n * Intégration avec les systèmes de paiement en ligne (par exemple, Stripe, PayPal)\n * Intégration avec les systèmes de gestion de restaurants (par exemple, API de restaurants)\n4. **Sécurité** :\n * Protection des données des utilisateurs et des restaurants\n * Sécurisation des transactions de paiement\n\n**Défis Potentiels**\n\n1. **Délai serré** : 3 mois pour développer une application mobile complète peut être un défi, notamment si les exigences du projet évoluent au cours du développement.\n2. **Budget limité** : 50 000 euros peuvent ne pas être suffisants pour couvrir tous les coûts de développement, notamment si des fonctionnalités complexes sont requises.\n3. **Concurrence** : La ville de 500 000 habitants peut déjà avoir des applications de livraison de repas existantes, ce qui peut rendre difficile l'obtention d'une part de marché significative.\n\n**Solutions Possibles**\n\n1. **Développement Agile** : Utiliser une méthodologie de développement agile pour répondre rapidement aux changements dans les exigences du projet et pour livrer des fonctionnalités incrémentales.\n2. **Priorisation des Fonctionnalités** : Prioriser les fonctionnalités les plus importantes pour le client et les utilisateurs, et reporter les fonctionnalités moins importantes pour une version ultérieure.\n3. **Utilisation de Technologies Open-Source** : Utiliser des technologies open-source pour réduire les coûts de développement et de maintenance.\n4. **Partenariat avec des Restaurants** : Établir des partenariats avec des restaurants pour offrir des promotions et des avantages exclusifs aux utilisateurs de l'application.\n5. **Marketing et Promotion** : Mettre en place une stratégie de marketing et de promotion pour attirer les utilisateurs et les restaurants.\n\n**Conclusion**\n\nLe projet d'application mobile de livraison de repas pour une ville de 500 000 habitants avec un budget de 50 000 euros et un délai de 3 mois est un défi. Cependant, avec une approche de développement agile, une priorisation des fonctionnalités, l'utilisation de technologies open-source et des partenariats avec des restaurants, il est possible de livrer une application mobile de qualité qui répond aux besoins du client et des utilisateurs. Il est important de travailler étroitement avec le client pour comprendre ses besoins et ses attentes, et pour adapter la solution aux contraintes du projet.",
+        "wordCount": 472,
+        "isError": false,
+        "language_detected": "fr",
+        "mentions": []
+      },
+      {
+        "sender": "deepseek",
+        "time": "12:00",
+        "agent": "DeepSeek R1",
+        "agent_nickname": "Agent-G",
+        "model_id": "deepseek-r1-distill-llama-70b",
+        "position": 7,
+        "round": 0,
+        "text": "⚠ The model `deepseek-r1-distill-llama-70b` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.",
+        "wordCount": 25,
+        "isError": true,
+        "language_detected": "en",
+        "mentions": []
+      },
+      {
+        "sender": "qwen",
+        "time": "12:00",
+        "agent": "Qwen3 32B",
+        "agent_nickname": "Agent-F",
+        "model_id": "qwen/qwen3-32b",
+        "position": 6,
+        "round": 0,
+        "text": "**Analyse et proposition pour une application de livraison de repas avec un budget de 50k EUR et un délai de 3 mois**  \nVoici une analyse structurée et une proposition pour répondre aux exigences du client, en tenant compte des contraintes budgétaires et temporelles.\n\n---\n\n### **1. Objectifs et contraintes**  \n- **Public cible** : Ville de 500 000 habitants.  \n- **Budget** : 50 000 EUR (strict, nécessite une optimisation des coûts).  \n- **Délai** : 3 mois (exige une priorité sur les fonctionnalités essentielles).  \n- **Objectif** : Développer une application mobile (iOS/Android) pour la livraison de repas, intégrant les bases d’une solution opérationnelle.\n\n---\n\n### **",
+        "wordCount": 104,
+        "isError": false,
+        "language_detected": "fr",
+        "mentions": []
+      },
+      {
+        "sender": "kimi",
+        "time": "12:00",
+        "agent": "Kimi K2",
+        "agent_nickname": "Agent-E",
+        "model_id": "moonshotai/kimi-k2-instruct-0905",
+        "position": 5,
+        "round": 0,
+        "text": "⚠ moonshotai/kimi-k2-instruct-0905 is currently over capacity. Please try again and back off exponentially. Visit https://groqstatus.com to see if there is an active incident.",
+        "wordCount": 23,
+        "isError": true,
+        "language_detected": "en",
+        "mentions": []
+      },
+      {
+        "sender": "scout",
+        "time": "12:00",
+        "agent": "LLaMA 4 Scout",
+        "agent_nickname": "Agent-H",
+        "model_id": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "position": 8,
+        "round": 0,
+        "text": "**Analyse du Projet de Développement d'une Application Mobile de Livraison de Repas**\n\n**Introduction**\n\nNous avons été sollicités pour développer une application mobile de livraison de repas pour une ville de 500 000 habitants avec un budget de 50 000 EUR et une deadline de 3 mois. Dans cette analyse, nous allons évaluer les exigences du projet, les défis potentiels et proposer une approche pour atteindre les objectifs.\n\n**Exigences du Projet**\n\n* Développer une application mobile de livraison de repas pour une ville de 500 000 habitants\n* Budget : 50 000 EUR\n* Deadline : 3 mois\n\n**Analyse des Exigences**\n\n* **Fonctionnalités requises** :\n + Inscription et connexion des utilisateurs\n + Recherche et sélection de restaurants\n + Commande et paiement en ligne\n + Suivi de la commande et notification de statut\n + Intégration avec les systèmes de paiement et de gestion de restaurants\n* **Caractéristiques techniques** :\n + Développement pour les plateformes iOS et Android\n + Utilisation d'un framework de développement cross-plateforme (par exemple, React Native ou Flutter)\n + Intégration avec des API de géolocalisation et de paiement\n\n**Défis Potentiels**\n\n* **Complexité du projet** : développer une application de livraison de repas nécessite une intégration avec plusieurs systèmes et une gestion de la logistique complexe.\n* **Budget limité** : 50 000 EUR peut être insuffisant pour développer une application complète et la lancer sur les marchés.\n* **Deadline serrée** : 3 mois est un délai court pour développer et tester une application de qualité.\n\n**Approche Proposée**\n\n* **Phase 1 : Analyse et conception** (1 semaine)\n + Étude de marché et analyse des concurrents\n + Définition des exigences fonctionnelles et techniques\n + Création d'un wireframe et d'un prototype\n* **Phase 2 : Développement** (8 semaines)\n + Développement de l'application pour les plateformes iOS et Android\n + Intégration avec les systèmes de paiement et de gestion de restaurants\n + Test et débogage\n* **Phase 3 : Lancement et marketing** (2 semaines)\n + Lancement de l'application sur les marchés\n + Campagne de marketing et promotion\n\n**Estimation des Coûts**\n\n* **Développement** : 30 000 EUR (60% du budget)\n* **Conception et analyse** : 5 000 EUR (10% du budget)\n* **Lancement et marketing** : 10 000 EUR (20% du budget)\n* **Autres coûts** : 5 000 EUR (10% du budget)\n\n**Conclusion**\n\nLe projet de développement d'une application mobile de livraison de repas pour une ville de 500 000 habitants avec un budget de 50 000 EUR et une deadline de 3 mois est ambitieux. Cependant, avec une approche structurée et une équipe expérimentée, il est possible de développer une application de qualité dans ce délai et avec ce budget. Nous proposons de suivre une approche en trois phases, avec une estimation des coûts détaillée. Nous sommes convaincus que notre équipe peut livrer une application de haute qualité qui répond aux besoins des utilisateurs et des restaurants.",
+        "wordCount": 472,
+        "isError": false,
+        "language_detected": "fr",
+        "mentions": []
+      }
+    ]
+  },
+  "stats": {
+    "totalMessages": 9,
+    "userMessages": 1,
+    "aiMessages": 8,
+    "errors": 2,
+    "rounds": 1,
+    "agentsWhoResponded": [
+      "GPT-OSS 120B",
+      "GPT-OSS 20B",
+      "LLaMA 4 Maverick",
+      "LLaMA 3.3 70B",
+      "Qwen3 32B",
+      "LLaMA 4 Scout"
+    ],
+    "agentsWhoErrored": {
+      "permanent": [
+        "DeepSeek R1"
+      ],
+      "transient": [
+        "Kimi K2"
+      ]
+    },
+    "compensationEvents": []
+  },
+  "batch": {
+    "index": 8,
+    "total": 20,
+    "series": "F"
+  }
+}
