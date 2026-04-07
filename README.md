@@ -94,9 +94,9 @@ This generates all 11 figures in `figures/`. Runtime: ~30 seconds.
 ## Citation
 
 ```bibtex
-@inproceedings{elkandoussi2026behavioral,
+@inproceedings{anonymous2026behavioral,
   title={``Who Am I, and Who Else Is Here?'' Behavioral Differentiation Without Role Assignment in Multi-Agent LLM Systems},
-  author={El Kandoussi, Houssam},
+  author={Anonymous},
   year={2026}
 }
 ```
