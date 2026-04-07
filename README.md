@@ -104,4 +104,4 @@ This generates all 11 figures in `figures/`. Runtime: ~30 seconds.
 ## License
 
 Data and code are released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-Raw JSON transcripts are included in the Data/Transcripts directory.
+Raw JSON transcripts are included in the data/Transcripts directory.
